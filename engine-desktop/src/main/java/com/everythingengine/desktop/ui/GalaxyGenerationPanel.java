@@ -20,7 +20,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -36,18 +35,22 @@ import javafx.util.StringConverter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class GalaxyGenerationPanel {
     private final DesktopContext context;
     private final GalaxyGenerator generator = new GalaxyGenerator();
     private final TextField name = new TextField();
-    private final TextField radius = new TextField("50000");
-    private final TextField population = new TextField("1000");
-    private final TextField seed = new TextField("42");
-    private final ComboBox<GalaxyType> type = new ComboBox<>();
-    private final ComboBox<GalaxyGenerationMode> mode = new ComboBox<>();
-    private final ComboBox<DistributionKind> distribution = new ComboBox<>();
-    private final CheckBox createStars = new CheckBox("Create one sample star per system");
+    private final NumericValueControl radius = new NumericValueControl("50000",
+            NumericValueControl.Kind.DECIMAL);
+    private final NumericValueControl population = new NumericValueControl("1000",
+            NumericValueControl.Kind.INTEGER);
+    private final NumericValueControl seed = new NumericValueControl("42",
+            NumericValueControl.Kind.LONG);
+    private final ComboBox<GenerationChoice<GalaxyType>> type = new ComboBox<>();
+    private final ComboBox<GenerationChoice<GalaxyGenerationMode>> mode = new ComboBox<>();
+    private final ComboBox<GenerationChoice<DistributionKind>> distribution = new ComboBox<>();
+    private final ComboBox<GenerationChoice<Boolean>> createStars = new ComboBox<>();
     private final Button generate = UiSupport.button("Generate galaxy", this::startGeneration);
     private final Label status = new Label("Configure a galaxy and start generation.");
     private final TableView<Summary> results = new TableView<>();
@@ -55,28 +58,29 @@ public final class GalaxyGenerationPanel {
 
     public GalaxyGenerationPanel(DesktopContext context) {
         this.context = context;
-        type.getItems().setAll(GalaxyType.SPIRAL, GalaxyType.BARRED_SPIRAL, GalaxyType.ELLIPTICAL,
-                GalaxyType.LENTICULAR, GalaxyType.IRREGULAR);
-        type.setValue(GalaxyType.SPIRAL);
-        type.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(GalaxyType value) {
-                return value == null ? "" : Localization.text(value.key());
-            }
-
-            @Override
-            public GalaxyType fromString(String value) {
-                return type.getItems().stream()
-                        .filter(item -> Localization.text(item.key()).equals(value))
-                        .findFirst().orElse(null);
-            }
-        });
-        mode.getItems().setAll(GalaxyGenerationMode.values());
-        mode.setValue(GalaxyGenerationMode.STRUCTURAL);
-        mode.setConverter(converter(GalaxyGenerationMode::name));
-        distribution.getItems().setAll(DistributionKind.values());
-        distribution.setValue(DistributionKind.DISK);
-        distribution.setConverter(converter(DistributionKind::label));
+        type.getItems().setAll(GenerationChoice.random());
+        type.getItems().addAll(List.of(GalaxyType.SPIRAL, GalaxyType.BARRED_SPIRAL,
+                        GalaxyType.ELLIPTICAL, GalaxyType.LENTICULAR, GalaxyType.IRREGULAR).stream()
+                .map(galaxyType -> GenerationChoice.fixed(galaxyType.key(), galaxyType))
+                .toList());
+        type.setValue(type.getItems().get(1));
+        type.setConverter(choiceConverter(type));
+        mode.getItems().setAll(GenerationChoice.random());
+        mode.getItems().addAll(List.of(GalaxyGenerationMode.values()).stream()
+                .map(value -> GenerationChoice.fixed(value.name(), value))
+                .toList());
+        mode.setValue(mode.getItems().get(1));
+        mode.setConverter(choiceConverter(mode));
+        distribution.getItems().setAll(GenerationChoice.random());
+        distribution.getItems().addAll(List.of(DistributionKind.values()).stream()
+                .map(value -> GenerationChoice.fixed(value.label(), value))
+                .toList());
+        distribution.setValue(distribution.getItems().get(2));
+        distribution.setConverter(choiceConverter(distribution));
+        createStars.getItems().setAll(GenerationChoice.random(),
+                GenerationChoice.fixed("Yes", true), GenerationChoice.fixed("No", false));
+        createStars.setValue(createStars.getItems().get(1));
+        createStars.setConverter(choiceConverter(createStars));
         mode.setOnAction(event -> updateModeControls());
 
         GridPane form = new GridPane();
@@ -89,7 +93,7 @@ public final class GalaxyGenerationPanel {
         form.addRow(4, new Label("System count:"), population);
         form.addRow(5, new Label("Spatial distribution:"), distribution);
         form.addRow(6, new Label("Seed:"), seed);
-        form.add(createStars, 1, 7);
+        form.addRow(7, new Label("Create one sample star per system:"), createStars);
         GridPane.setHgrow(name, Priority.ALWAYS);
         GridPane.setHgrow(type, Priority.ALWAYS);
         GridPane.setHgrow(mode, Priority.ALWAYS);
@@ -120,15 +124,21 @@ public final class GalaxyGenerationPanel {
     private void startGeneration() {
         GalaxyGenerationConfig config;
         try {
-            double radiusParsecs = Double.parseDouble(radius.getText().trim());
-            int systemCount = mode.getValue() == GalaxyGenerationMode.STRUCTURAL
-                    ? 0 : Integer.parseInt(population.getText().trim());
-            long randomSeed = Long.parseLong(seed.getText().trim());
+            double radiusParsecs = radius.sample().doubleValue();
+            GalaxyGenerationMode selectedMode = selected(mode);
+            int systemCount = selectedMode == GalaxyGenerationMode.STRUCTURAL
+                    ? 0 : population.sample().intValue();
+            if (selectedMode != GalaxyGenerationMode.STRUCTURAL
+                    && (systemCount < 1 || systemCount > 10_000)) {
+                throw new IllegalArgumentException(
+                        Localization.text("System count must be between 1 and 10000."));
+            }
+            long randomSeed = seed.sample().longValue();
             GalaxyExtent extent = GalaxyExtent.spherical(radiusParsecs);
-            config = new GalaxyGenerationConfig(name.getText(), type.getValue(),
+            config = new GalaxyGenerationConfig(name.getText(), selected(type),
                     new Position3D(new CoordinateSpace("generated-galaxy"), 0, 0, 0), extent,
-                    mode.getValue(), systemCount, distributionFor(extent), Optional.empty(),
-                    createStars.isSelected(), randomSeed);
+                    selectedMode, systemCount, distributionFor(extent), Optional.empty(),
+                    selected(createStars), randomSeed);
         } catch (IllegalArgumentException exception) {
             status.setText(Localization.text("Invalid configuration: ") + exception.getMessage());
             return;
@@ -176,7 +186,7 @@ public final class GalaxyGenerationPanel {
     }
 
     private Optional<PositionDistribution> distributionFor(GalaxyExtent extent) {
-        return Optional.of(switch (distribution.getValue()) {
+        return Optional.of(switch (selected(distribution)) {
             case UNIFORM -> new UniformEllipsoidDistribution(extent);
             case DISK -> new DiskDistribution(extent.radiusXParsecs() * 0.8, extent.radiusZParsecs() * 0.1);
             case RADIAL -> new RadialDistribution(extent.radiusXParsecs() * 0.9, 2);
@@ -187,7 +197,8 @@ public final class GalaxyGenerationPanel {
     }
 
     private void updateModeControls() {
-        boolean structural = mode.getValue() == GalaxyGenerationMode.STRUCTURAL;
+        boolean structural = mode.getValue() != null
+                && mode.getValue().value().filter(value -> value == GalaxyGenerationMode.STRUCTURAL).isPresent();
         population.setDisable(structural);
         distribution.setDisable(structural);
         createStars.setDisable(structural);
@@ -224,18 +235,37 @@ public final class GalaxyGenerationPanel {
         return extent.radiusXParsecs() + " × " + extent.radiusYParsecs() + " × " + extent.radiusZParsecs();
     }
 
-    private <T> StringConverter<T> converter(java.util.function.Function<T, String> nameFunction) {
+    private <T> StringConverter<GenerationChoice<T>> choiceConverter(
+            ComboBox<GenerationChoice<T>> selector) {
         return new StringConverter<>() {
             @Override
-            public String toString(T value) {
-                return value == null ? "" : Localization.text(nameFunction.apply(value));
+            public String toString(GenerationChoice<T> choice) {
+                return choice == null ? "" : Localization.text(choice.label());
             }
 
             @Override
-            public T fromString(String value) {
-                return null;
+            public GenerationChoice<T> fromString(String value) {
+                return selector.getItems().stream()
+                        .filter(choice -> Localization.text(choice.label()).equals(value))
+                        .findFirst().orElse(null);
             }
         };
+    }
+
+    private <T> T selected(ComboBox<GenerationChoice<T>> selector) {
+        GenerationChoice<T> choice = selector.getValue();
+        if (choice == null) {
+            throw new IllegalArgumentException(Localization.text("Select a value or Random."));
+        }
+        return choice.value().orElseGet(() -> {
+            List<T> values = selector.getItems().stream()
+                    .flatMap(item -> item.value().stream())
+                    .toList();
+            if (values.isEmpty()) {
+                throw new IllegalArgumentException(Localization.text("No random choices are available."));
+            }
+            return values.get(ThreadLocalRandom.current().nextInt(values.size()));
+        });
     }
 
     private record Summary(String property, String value) {
