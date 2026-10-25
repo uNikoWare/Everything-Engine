@@ -60,8 +60,14 @@ The packaging script requires a JDK installation that provides `jpackage`. It cr
 scripts\package-windows-installer.bat
 ```
 
-The MSI is written to `dist\windows\`. Its stable upgrade UUID allows a later MSI release to upgrade the installed application. Increment `desktop.app.version` in the root `pom.xml` for each release.
+The MSI is written to `dist\windows\`. Its stable upgrade UUID allows a later MSI release to upgrade the installed application. Set the app version in `desktop.app.version` in the root `pom.xml` before each release.
 The supplied Everything Engine logo appears on the dashboard; its matching icon is used by the app window, packaged application, and installer.
+
+### Version scheme
+
+The canonical version is `v.a.b.c` with an optional development-branch suffix `_d`, for example `v.0.1.1` or `v.0.1.1_a`. The current version is **`v.0.1.1`**. The canonical value is maintained in the root `pom.xml` as `desktop.app.version`; the app displays it and the update manifest uses the same format. Windows packaging uses numeric version `(a + 1).b.c` and omits the branch suffix: this keeps Windows Installer upgrades monotonic and allows the new `v.0.1.1` package to upgrade an earlier `1.0.0` MSI. The `jpackage` version is an installer compatibility value, not the version shown inside the app.
+
+Version components are increased from left to right: `a` starts at 0 and increases only when the engine is ready for release; `b` starts at 0 and increases for foundational features that change the app's structure; `c` starts at 0 and increases for other changes. When a component increases, every component to its right resets to 0. Use `_a` through `_z` only when development branches need distinct version labels; a branch suffix does not reset when numeric components change. For versions with the same numeric components, branch letters sort alphabetically and an unsuffixed version sorts after branch builds.
 
 ### In-app updates
 
@@ -70,8 +76,8 @@ In **Settings**, enter and save the HTTPS URL of a trusted update manifest, then
 Host the MSI and a UTF-8 Java-properties manifest at an HTTPS location. Publish the MSI first, then publish a manifest such as:
 
 ```properties
-version=1.1.0
-installerUrl=https://downloads.example.org/Everything-Engine-1.1.0.msi
+version=v.0.1.2
+installerUrl=https://downloads.example.org/Everything-Engine-v.0.1.2.msi
 sha256=64-character-lowercase-or-uppercase-SHA-256-hex-digest
 releaseNotes=What changed in this release
 ```
