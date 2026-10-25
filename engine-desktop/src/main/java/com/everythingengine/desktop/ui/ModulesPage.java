@@ -72,10 +72,12 @@ public final class ModulesPage implements Page {
             return;
         }
         var descriptor = module.descriptor();
-        details.setText(descriptor.name() + " · " + descriptor.version() + "\n"
-                + descriptor.description() + "\nID: " + descriptor.id()
-                + "\nStatus: " + module.status()
-                + "\nDependencies: " + (descriptor.dependencies().isEmpty() ? "None" : descriptor.dependencies())
-                + "\nCapabilities: " + (descriptor.capabilities().isEmpty() ? "None" : descriptor.capabilities()));
+        details.setText(Localization.text(descriptor.name()) + " · " + descriptor.version() + "\n"
+                + Localization.text(descriptor.description()) + "\n" + Localization.text("ID: ") + descriptor.id()
+                + "\n" + Localization.text("Status: ") + Localization.text(module.status().name())
+                + "\n" + Localization.text("Dependencies: ")
+                + (descriptor.dependencies().isEmpty() ? Localization.text("None") : descriptor.dependencies())
+                + "\n" + Localization.text("Capabilities: ")
+                + (descriptor.capabilities().isEmpty() ? Localization.text("None") : descriptor.capabilities()));
     }
 }

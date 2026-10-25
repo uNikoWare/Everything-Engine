@@ -16,11 +16,16 @@ public final class SettingsStore {
     private final Path settingsFile;
     private final DiagnosticService diagnostics;
     private Theme theme = Theme.DARK;
+    private Language language = Language.ENGLISH;
     private String updateManifestUrl = "";
 
     public SettingsStore(DiagnosticService diagnostics) {
+        this(diagnostics, settingsPath());
+    }
+
+    SettingsStore(DiagnosticService diagnostics, Path settingsFile) {
         this.diagnostics = diagnostics;
-        this.settingsFile = settingsPath();
+        this.settingsFile = Objects.requireNonNull(settingsFile, "settingsFile");
         load();
     }
 
@@ -36,9 +41,30 @@ public final class SettingsStore {
         return updateManifestUrl;
     }
 
+    public Language language() {
+        return language;
+    }
+
     public void setTheme(Theme theme) throws IOException {
+        Theme previousTheme = this.theme;
         this.theme = Objects.requireNonNull(theme, "theme");
-        save();
+        try {
+            save();
+        } catch (IOException exception) {
+            this.theme = previousTheme;
+            throw exception;
+        }
+    }
+
+    public void setLanguage(Language language) throws IOException {
+        Language previousLanguage = this.language;
+        this.language = Objects.requireNonNull(language, "language");
+        try {
+            save();
+        } catch (IOException exception) {
+            this.language = previousLanguage;
+            throw exception;
+        }
     }
 
     public void setUpdateManifestUrl(String url) throws IOException {
@@ -64,6 +90,7 @@ public final class SettingsStore {
         try (InputStream input = Files.newInputStream(settingsFile)) {
             properties.load(input);
             theme = Theme.valueOf(properties.getProperty("theme", "DARK").toUpperCase(Locale.ROOT));
+            language = Language.valueOf(properties.getProperty("language", "ENGLISH").toUpperCase(Locale.ROOT));
             updateManifestUrl = properties.getProperty("update.manifest.url", "").trim();
             if (!updateManifestUrl.isEmpty()) {
                 UpdateClient.validateHttpsUri(updateManifestUrl);
@@ -71,6 +98,7 @@ public final class SettingsStore {
         } catch (IOException | IllegalArgumentException exception) {
             diagnostics.warning("Settings", "Could not load settings; using defaults: " + exception.getMessage());
             theme = Theme.DARK;
+            language = Language.ENGLISH;
             updateManifestUrl = "";
         }
     }
@@ -78,6 +106,7 @@ public final class SettingsStore {
     private void save() throws IOException {
         Properties properties = new Properties();
         properties.setProperty("theme", theme.name());
+        properties.setProperty("language", language.name());
         properties.setProperty("update.manifest.url", updateManifestUrl);
         Files.createDirectories(settingsFile.getParent());
         try (OutputStream output = Files.newOutputStream(settingsFile)) {
@@ -85,7 +114,7 @@ public final class SettingsStore {
         }
     }
 
-    private Path settingsPath() {
+    private static Path settingsPath() {
         String appData = System.getenv("APPDATA");
         if (appData != null && !appData.isBlank()) {
             return Path.of(appData, "EverythingEngine", "settings.properties");

@@ -1,0 +1,330 @@
+package com.everythingengine.desktop.ui;
+
+import com.everythingengine.desktop.settings.Language;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.Labeled;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.control.TitledPane;
+
+import java.util.Map;
+
+public final class Localization {
+    private static volatile Language currentLanguage = Language.ENGLISH;
+
+    private static final Map<String, String> GERMAN = Map.ofEntries(
+            Map.entry("Dashboard", "Übersicht"),
+            Map.entry("Universe", "Universum"),
+            Map.entry("Entities", "Entitäten"),
+            Map.entry("Relations", "Beziehungen"),
+            Map.entry("Modules", "Module"),
+            Map.entry("Name Generation", "Namensgenerator"),
+            Map.entry("Testing", "Tests"),
+            Map.entry("Logs", "Protokolle"),
+            Map.entry("Settings", "Einstellungen"),
+            Map.entry("WORKSPACE", "ARBEITSBEREICH"),
+            Map.entry("EVERYTHING ENGINE", "EVERYTHING ENGINE"),
+            Map.entry("DEVELOPMENT WORKSPACE", "ENTWICKLUNGSUMGEBUNG"),
+            Map.entry("Ready · Universe is in memory", "Bereit · Universum im Arbeitsspeicher"),
+            Map.entry("CORE READY · NO ERRORS", "KERN BEREIT · KEINE FEHLER"),
+            Map.entry("CORE READY · ", "KERN BEREIT · "),
+            Map.entry("In-memory universe · No persistence configured", "Universum im Arbeitsspeicher · Keine Speicherung"),
+            Map.entry("Engine status and quick access to the current workspace.",
+                    "Systemstatus und Schnellzugriff auf den aktuellen Arbeitsbereich."),
+            Map.entry("ENGINE STATUS", "SYSTEMSTATUS"),
+            Map.entry("Core initialized", "Kern initialisiert"),
+            Map.entry("Persistence: Not configured", "Speicherung: Nicht eingerichtet"),
+            Map.entry("ENTITIES", "ENTITÄTEN"),
+            Map.entry("RELATIONS", "BEZIEHUNGEN"),
+            Map.entry("REGISTERED MODULES", "REGISTRIERTE MODULE"),
+            Map.entry("ACTIVE MODULES", "AKTIVE MODULE"),
+            Map.entry("LAST TEST RUN", "LETZTER TESTLAUF"),
+            Map.entry("Quick access", "Schnellzugriff"),
+            Map.entry("Explore entities", "Entitäten anzeigen"),
+            Map.entry("View relations", "Beziehungen anzeigen"),
+            Map.entry("Manage modules", "Module verwalten"),
+            Map.entry("Generate names", "Namen erzeugen"),
+            Map.entry("Run tests", "Tests ausführen"),
+            Map.entry("Universe Explorer", "Universum-Explorer"),
+            Map.entry("Inspect the entities and directed relationships held in memory.",
+                    "Entitäten und gerichtete Beziehungen im Arbeitsspeicher untersuchen."),
+            Map.entry("Name", "Name"),
+            Map.entry("Type", "Typ"),
+            Map.entry("UUID", "UUID"),
+            Map.entry("Entity Explorer", "Entitäten-Explorer"),
+            Map.entry("Find, inspect and manage registered entities and their attributes.",
+                    "Registrierte Entitäten und ihre Attribute suchen, untersuchen und verwalten."),
+            Map.entry("Search name or UUID", "Name oder UUID suchen"),
+            Map.entry("All Types", "Alle Typen"),
+            Map.entry("New Entity", "Neue Entität"),
+            Map.entry("Generate Name", "Namen erzeugen"),
+            Map.entry("Rename", "Umbenennen"),
+            Map.entry("Delete", "Löschen"),
+            Map.entry("Delete ", "Löschen "),
+            Map.entry("Add", "Hinzufügen"),
+            Map.entry("Cancel", "Abbrechen"),
+            Map.entry("OK", "OK"),
+            Map.entry("Registered entities", "Registrierte Entitäten"),
+            Map.entry("Select an entity", "Entität auswählen"),
+            Map.entry("General Information", "Allgemeine Informationen"),
+            Map.entry("Copy UUID", "UUID kopieren"),
+            Map.entry("Attributes", "Attribute"),
+            Map.entry("No attributes defined.", "Keine Attribute vorhanden."),
+            Map.entry("No entity selected.", "Keine Entität ausgewählt."),
+            Map.entry("Add Attribute", "Attribut hinzufügen"),
+            Map.entry("Remove Selected", "Auswahl entfernen"),
+            Map.entry("Key", "Schlüssel"),
+            Map.entry("Value", "Wert"),
+            Map.entry("Relation Explorer", "Beziehungs-Explorer"),
+            Map.entry("Inspect directed relationships between registered entities.",
+                    "Gerichtete Beziehungen zwischen registrierten Entitäten untersuchen."),
+            Map.entry("Source name or UUID", "Quellname oder UUID"),
+            Map.entry("Target name or UUID", "Zielname oder UUID"),
+            Map.entry("Relation type", "Beziehungstyp"),
+            Map.entry("Add Relation", "Beziehung hinzufügen"),
+            Map.entry("Open Source", "Quelle öffnen"),
+            Map.entry("Open Target", "Ziel öffnen"),
+            Map.entry("Relation Type", "Beziehungstyp"),
+            Map.entry("Relation UUID", "Beziehungs-UUID"),
+            Map.entry("Type key", "Typ-Schlüssel"),
+            Map.entry("Source", "Quelle"),
+            Map.entry("Target", "Ziel"),
+            Map.entry("Module Manager", "Modulverwaltung"),
+            Map.entry("Engine Core", "Engine-Kern"),
+            Map.entry("Randomization Utilities", "Zufallsfunktionen"),
+            Map.entry("Validation Framework", "Validierungsframework"),
+            Map.entry("Desktop Application", "Desktop-Anwendung"),
+            Map.entry("Entity, attribute, relation and universe APIs.",
+                    "APIs für Entitäten, Attribute, Beziehungen und Universen."),
+            Map.entry("Deterministic seeded generation, weighted choice selection and reproducible random services.",
+                    "Reproduzierbare Zufallsgenerierung mit Startwerten und gewichteter Auswahl."),
+            Map.entry("Reusable validation rules, error reporting, and issue aggregation.",
+                    "Wiederverwendbare Validierungsregeln sowie Sammlung von Fehlern und Warnungen."),
+            Map.entry("Profile-driven naming strategies with deterministic generation and duplicate avoidance.",
+                    "Profilbasierte Namensstrategien mit reproduzierbarer Generierung und Duplikatvermeidung."),
+            Map.entry("JavaFX development and inspection tools.", "JavaFX-Entwicklungs- und Inspektionswerkzeuge."),
+            Map.entry("Registered components", "Registrierte Komponenten"),
+            Map.entry("Module", "Modul"),
+            Map.entry("Version", "Version"),
+            Map.entry("Status", "Status"),
+            Map.entry("Preview deterministic generated names for the core naming module.",
+                    "Deterministisch erzeugte Namen des Namensgenerators anzeigen."),
+            Map.entry("Exotic syllables", "Exotische Silben"),
+            Map.entry("Compound location", "Zusammengesetzter Ort"),
+            Map.entry("Technical template", "Technische Vorlage"),
+            Map.entry("Alien-sounding names built from prefix, core and suffix syllables.",
+                    "Fremdartig klingende Namen aus Präfix, Stammsilbe und Endung."),
+            Map.entry("Names for regions or star systems assembled from multiple lexical parts.",
+                    "Namen für Regionen oder Sternensysteme aus mehreren Wortteilen."),
+            Map.entry("Machine-readable identifiers assembled from a template.",
+                    "Maschinenlesbare Kennungen aus einer Vorlage."),
+            Map.entry("Profile:", "Profil:"),
+            Map.entry("Generate sample set", "Beispielnamen erzeugen"),
+            Map.entry("No profile selected.", "Kein Profil ausgewählt."),
+            Map.entry("No names generated yet.", "Noch keine Namen erzeugt."),
+            Map.entry("Selected profile: ", "Ausgewähltes Profil: "),
+            Map.entry("Generated 8 names for: ", "8 Namen erzeugt für: "),
+            Map.entry("Syllable generation", "Silbengenerierung"),
+            Map.entry("WORD", "WORT"),
+            Map.entry("SYLLABLE", "SILBE"),
+            Map.entry("TEMPLATE", "VORLAGE"),
+            Map.entry("A small set of persisted preferences for this desktop application.",
+                    "Einstellungen für diese Desktop-Anwendung."),
+            Map.entry("Theme", "Design"),
+            Map.entry("Language", "Sprache"),
+            Map.entry("English", "Englisch"),
+            Map.entry("German", "Deutsch"),
+            Map.entry("Settings file: ", "Einstellungsdatei: "),
+            Map.entry("Theme changes are saved to the current user's application data directory.",
+                    "Design und Sprache werden im Anwendungsdatenordner des aktuellen Benutzers gespeichert."),
+            Map.entry("Universes are currently temporary and are not saved. Language and logging-level preferences are not implemented.",
+                    "Universen werden automatisch gespeichert. Sprache kann hier geändert werden."),
+            Map.entry("Save Universe", "Universum speichern"),
+            Map.entry("Load Universe", "Universum laden"),
+            Map.entry("Save", "Speichern"),
+            Map.entry("Load", "Laden"),
+            Map.entry("Saved universe", "Universum gespeichert"),
+            Map.entry("Could not save universe", "Universum konnte nicht gespeichert werden"),
+            Map.entry("Could not load universe", "Universum konnte nicht geladen werden"),
+            Map.entry("Choose a universe file", "Universum-Datei auswählen"),
+            Map.entry("No data available.", "Keine Daten vorhanden."),
+            Map.entry("entities", "Entitäten"),
+            Map.entry("relations", "Beziehungen"),
+            Map.entry("Autosaved", "Automatisch gespeichert"),
+            Map.entry("Not Run", "Nicht ausgeführt"),
+            Map.entry("Application errors: None", "Anwendungsfehler: Keine"),
+            Map.entry("Empty · In memory only", "Leer · Nur im Arbeitsspeicher"),
+            Map.entry("Initialized · In memory only", "Initialisiert · Nur im Arbeitsspeicher"),
+            Map.entry("No module selected.", "Kein Modul ausgewählt."),
+            Map.entry("Core initialized; current universe is in-memory only.",
+                    "Kern initialisiert; Universum wird automatisch gespeichert."),
+            Map.entry("DARK", "DUNKEL"),
+            Map.entry("LIGHT", "HELL"),
+            Map.entry("A foundation for building and exploring science-fiction universes.",
+                    "Eine Grundlage zum Erstellen und Erkunden von Science-Fiction-Universen."),
+            Map.entry("Application events", "Anwendungsereignisse"),
+            Map.entry("Timestamp", "Zeitstempel"),
+            Map.entry("Level", "Stufe"),
+            Map.entry("Message", "Meldung"),
+            Map.entry("All Levels", "Alle Stufen"),
+            Map.entry("Search source or message", "Quelle oder Meldung suchen"),
+            Map.entry("Refresh", "Aktualisieren"),
+            Map.entry("Testing Center", "Testcenter"),
+            Map.entry("Run the project's fixed Maven test goal without blocking the interface.",
+                    "Den festgelegten Maven-Testlauf ausführen, ohne die Oberfläche zu blockieren."),
+            Map.entry("Run Maven Tests", "Maven-Tests ausführen"),
+            Map.entry("Test results will appear here.", "Testergebnisse erscheinen hier."),
+            Map.entry("Unavailable: no pom.xml was found from the current working directory.",
+                    "Nicht verfügbar: Im aktuellen Arbeitsverzeichnis wurde keine pom.xml gefunden."),
+            Map.entry("Latest run", "Letzter Lauf"),
+            Map.entry("No test run has been performed.", "Es wurde noch kein Testlauf ausgeführt."),
+            Map.entry("Running", "Läuft"),
+            Map.entry("Maven test process is running in the background.",
+                    "Der Maven-Testprozess läuft im Hintergrund."),
+            Map.entry("No process output.", "Keine Prozessausgabe."),
+            Map.entry("Project: ", "Projekt: "),
+            Map.entry("Command: ", "Befehl: "),
+            Map.entry("passed", "bestanden"),
+            Map.entry("failed", "fehlgeschlagen"),
+            Map.entry("skipped", "übersprungen"),
+            Map.entry("SUCCESS", "ERFOLGREICH"),
+            Map.entry("Logs & Diagnostics", "Protokolle & Diagnose"),
+            Map.entry("Review application diagnostics captured through java.util.logging.",
+                    "Anwendungsdiagnosen aus java.util.logging anzeigen."),
+            Map.entry("Select a module to inspect its metadata.", "Modul auswählen, um dessen Metadaten anzuzeigen."),
+            Map.entry("Review explicitly registered application components and extension availability.",
+                    "Registrierte Anwendungskomponenten und Erweiterungen überprüfen."),
+            Map.entry("Built-in core modules are registered. Dynamic loading and activation for extension modules remain unimplemented.",
+                    "Die integrierten Kernmodule sind registriert. Dynamisches Laden und Aktivieren von Erweiterungen ist noch nicht verfügbar."),
+            Map.entry("Dependencies: ", "Abhängigkeiten: "),
+            Map.entry("Capabilities: ", "Funktionen: "),
+            Map.entry("ID: ", "ID: "),
+            Map.entry("Status: ", "Status: "),
+            Map.entry("ACTIVE", "AKTIV"),
+            Map.entry("INACTIVE", "INAKTIV"),
+            Map.entry("FAILED", "FEHLGESCHLAGEN"),
+            Map.entry("None", "Keine"),
+            Map.entry("Entity name", "Entitätsname"),
+            Map.entry("Create Entity", "Entität erstellen"),
+            Map.entry("Create a general-purpose entity", "Allgemeine Entität erstellen"),
+            Map.entry("Name:", "Name:"),
+            Map.entry("Rename Entity", "Entität umbenennen"),
+            Map.entry("Update the entity name", "Entitätsnamen ändern"),
+            Map.entry("Delete this entity and its connected relations?",
+                    "Diese Entität und ihre verknüpften Beziehungen löschen?"),
+            Map.entry("Add a typed attribute", "Typisiertes Attribut hinzufügen"),
+            Map.entry("String", "Text"),
+            Map.entry("Integer", "Ganzzahl"),
+            Map.entry("Decimal", "Dezimalzahl"),
+            Map.entry("Boolean", "Wahrheitswert"),
+            Map.entry("Could not create entity", "Entität konnte nicht erstellt werden"),
+            Map.entry("Could not rename entity", "Entität konnte nicht umbenannt werden"),
+            Map.entry("Could not delete entity", "Entität konnte nicht gelöscht werden"),
+            Map.entry("Could not add attribute", "Attribut konnte nicht hinzugefügt werden"),
+            Map.entry("Could not remove attribute", "Attribut konnte nicht entfernt werden"),
+            Map.entry("Could not generate entity name", "Entitätsname konnte nicht erzeugt werden"),
+            Map.entry("Register at least one entity before creating a relation.",
+                    "Registriere mindestens eine Entität, bevor du eine Beziehung erstellst."),
+            Map.entry("Create a directed relationship", "Gerichtete Beziehung erstellen"),
+            Map.entry("Relation not available", "Beziehung nicht verfügbar"),
+            Map.entry("Could not add relation", "Beziehung konnte nicht hinzugefügt werden"),
+            Map.entry("Save universe", "Universum speichern"),
+            Map.entry("Load universe", "Universum laden"),
+            Map.entry("Universe saved successfully.", "Universum erfolgreich gespeichert."),
+            Map.entry("Universe loaded successfully.", "Universum erfolgreich geladen."),
+            Map.entry("Everything Engine Universe (*.eeu)", "Everything-Engine-Universum (*.eeu)"),
+            Map.entry("Strategy: ", "Strategie: "),
+            Map.entry("Maximum attempts: ", "Maximale Versuche: "),
+            Map.entry("Unknown profile: ", "Unbekanntes Profil: "),
+            Map.entry("Profile id must not be blank", "Profil-ID darf nicht leer sein"),
+            Map.entry("Check for Updates", "Nach Updates suchen"),
+            Map.entry("Download and Install Update", "Update herunterladen und installieren"),
+            Map.entry("Application updates", "Anwendungsupdates"),
+            Map.entry("Installed version: ", "Installierte Version: "),
+            Map.entry("Update manifest URL (HTTPS)", "Update-Manifest-URL (HTTPS)"),
+            Map.entry("Save Update Feed", "Update-Feed speichern"),
+            Map.entry("Configure a trusted HTTPS update manifest to check for releases.",
+                    "Konfiguriere ein vertrauenswürdiges HTTPS-Update-Manifest."),
+            Map.entry("Updates are checked only when requested.", "Updates werden nur manuell gesucht."),
+            Map.entry("Save a trusted HTTPS update manifest URL before checking.",
+                    "Speichere vor der Suche eine vertrauenswürdige HTTPS-Manifest-URL."),
+            Map.entry("Checking for updates...", "Suche nach Updates..."),
+            Map.entry("Version ", "Version "),
+            Map.entry(" is available.", " ist verfügbar."),
+            Map.entry("Automatic installation is available only from the installed Windows app.",
+                    "Die automatische Installation ist nur in der installierten Windows-App verfügbar."),
+            Map.entry(" is up to date.", " ist aktuell."),
+            Map.entry("Update check failed: ", "Update-Suche fehlgeschlagen: "),
+            Map.entry("Install Update", "Update installieren"),
+            Map.entry("Install Everything Engine ", "Everything Engine installieren "),
+            Map.entry("The verified Windows Installer package will be downloaded. The application will close, apply the update, and restart.",
+                    "Das geprüfte Windows-Installer-Paket wird heruntergeladen. Die Anwendung wird geschlossen, aktualisiert und neu gestartet."),
+            Map.entry("Downloading and verifying the installer...", "Installer wird heruntergeladen und überprüft..."),
+            Map.entry("The verified update is ready. Closing to install and restart...",
+                    "Das geprüfte Update ist bereit. Anwendung wird zur Installation geschlossen..."),
+            Map.entry("Update Ready", "Update bereit"),
+            Map.entry("Everything Engine will now restart into version ", "Everything Engine wird mit Version "),
+            Map.entry("Approve the Windows Installer elevation prompt if Windows requests it.",
+                    "Bestätige gegebenenfalls die Windows-Installer-Abfrage zur Rechteerhöhung."),
+            Map.entry("Update download failed: ", "Update-Download fehlgeschlagen: "),
+            Map.entry("Automatic update checks are not configured.",
+                    "Automatische Updatesuche ist nicht konfiguriert."),
+            Map.entry("Update feed saved. Select Check for Updates to look for a release.",
+                    "Update-Feed gespeichert. Wähle „Nach Updates suchen“, um neue Versionen zu finden."),
+            Map.entry("Settings Error", "Einstellungsfehler"),
+            Map.entry("Could not save settings.", "Einstellungen konnten nicht gespeichert werden."),
+            Map.entry("ERROR", "FEHLER"),
+            Map.entry("Error", "Fehler"),
+            Map.entry("WARN", "WARNUNG"),
+            Map.entry("INFO", "INFO"),
+            Map.entry("DEBUG", "DEBUG"));
+
+    private Localization() {
+    }
+
+    public static void setLanguage(Language language) {
+        currentLanguage = language;
+    }
+
+    public static String text(String value) {
+        return text(value, currentLanguage);
+    }
+
+    public static void translate(Node node) {
+        translate(node, currentLanguage);
+    }
+
+    public static String text(String value, Language language) {
+        if (value == null) {
+            return "";
+        }
+        return language == Language.GERMAN ? GERMAN.getOrDefault(value, value) : value;
+    }
+
+    public static void translate(Node node, Language language) {
+        if (node instanceof Labeled labeled) {
+            labeled.setText(text(labeled.getText(), language));
+        }
+        if (node instanceof TextInputControl input) {
+            input.setPromptText(text(input.getPromptText(), language));
+        }
+        if (node instanceof TitledPane titledPane) {
+            titledPane.setText(text(titledPane.getText(), language));
+        }
+        if (node instanceof TableView<?> table) {
+            for (TableColumn<?, ?> column : table.getColumns()) {
+                translateColumn(column, language);
+            }
+        }
+        if (node instanceof Parent parent) {
+            parent.getChildrenUnmodifiable().forEach(child -> translate(child, language));
+        }
+    }
+
+    private static void translateColumn(TableColumn<?, ?> column, Language language) {
+        column.setText(text(column.getText(), language));
+        column.getColumns().forEach(child -> translateColumn(child, language));
+    }
+}

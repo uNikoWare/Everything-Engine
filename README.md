@@ -1,6 +1,6 @@
 # Everything Engine
 
-Modular Java foundation for a science-fiction universe engine, with a Windows-oriented JavaFX desktop workspace for inspection and development. The first release contains no domain-specific universe data, generators, persistence, or dynamically loaded extensions.
+Modular Java foundation for a science-fiction universe engine, with a Windows-oriented JavaFX desktop workspace for inspection and development. The desktop includes core name-generation examples and local universe persistence; it does not load dynamic extensions.
 
 ## Architecture
 
@@ -26,9 +26,11 @@ The Maven reactor has separate `engine-core` and `engine-desktop` modules. JavaF
 
 ## Desktop application
 
-The JavaFX workspace includes Dashboard, Universe, Entities, Relations, Modules, Testing, Logs, and Settings views. The entity view can create, rename, remove, and inspect generic entities and typed attributes. Relation records use the core API; entity removal also cleans up its relations. The universe is in-memory only and is never presented as saved.
+The JavaFX workspace includes Dashboard, Universe, Entities, Relations, Modules, Name Generation, Testing, Logs, and Settings views. The interface supports English and German, with English as the default; choose the language in **Settings**. The entity view can create, rename, remove, and inspect generic entities and typed attributes. Relation records use the core API; entity removal also cleans up its relations.
 
-The module manager lists the built-in core and desktop components and the generation-related core modules (randomization, validation, and naming). There are no dynamically loaded extension modules in this project. Dynamic JAR loading, module activation/deactivation, and plugin discovery are not implemented. The dark/light theme preference is persisted in the user's application-data directory. Diagnostics use `java.util.logging`.
+Universe changes are automatically saved to `universe.eeu` in the user's application-data directory (`%APPDATA%\EverythingEngine` on Windows). The Universe view also provides **Save Universe** and **Load Universe** for manually exporting or importing `.eeu` files. Files preserve entity and relation UUIDs, names, and String, Integer, Double, and Boolean attributes. Loading a file replaces the current universe and updates the automatic save. Settings (including language and theme) are also persisted in the user's application-data directory.
+
+The module manager lists the built-in core and desktop components and the generation-related core modules (randomization, validation, and naming). There are no dynamically loaded extension modules in this project. Dynamic JAR loading, module activation/deactivation, and plugin discovery are not implemented. Diagnostics use `java.util.logging`.
 
 The Testing Center invokes only the fixed `mvn -B test` goal, asynchronously. It requires a Maven project directory to be discoverable from the app's working directory and Maven installed on `PATH`; test totals are read from Surefire reports. If either prerequisite is missing, testing reports an error rather than fabricated results.
 
@@ -89,4 +91,4 @@ Replace the checksum placeholder with the 64-character SHA-256 digest of the exa
 
 ## Tests and limitations
 
-Core and desktop-service logic is covered by JUnit 5 without a display server. The GUI is not persisted between runs; there is no database, serialization, generator, graph visualization, localization, module classloader, or full UI automation. Application-created entities are held only for the current process.
+Core and desktop-service logic is covered by JUnit 5 without a display server. Universe files use a versioned local format and are not synchronized or encrypted. There is no database, graph visualization, module classloader, or full UI automation.

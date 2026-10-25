@@ -15,6 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -41,6 +42,17 @@ public final class LogsPage implements Page {
         createTable();
         severity.getItems().setAll("All Levels", "DEBUG", "INFO", "WARN", "ERROR");
         severity.setValue("All Levels");
+        severity.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(String value) {
+                return value == null ? "" : Localization.text(value);
+            }
+
+            @Override
+            public String fromString(String value) {
+                return Localization.text("All Levels").equals(value) ? "All Levels" : value;
+            }
+        });
         severity.setOnAction(event -> applyFilter());
         search.setPromptText("Search source or message");
         search.textProperty().addListener((observable, before, after) -> applyFilter());
@@ -70,7 +82,8 @@ public final class LogsPage implements Page {
         TableColumn<DiagnosticEntry, String> time = UiSupport.column("Timestamp", 160);
         time.setCellValueFactory(cell -> new ReadOnlyStringWrapper(TIMESTAMP.format(cell.getValue().timestamp())));
         TableColumn<DiagnosticEntry, String> level = UiSupport.column("Level", 90);
-        level.setCellValueFactory(cell -> new ReadOnlyStringWrapper(levelLabel(cell.getValue().level())));
+        level.setCellValueFactory(cell ->
+                new ReadOnlyStringWrapper(Localization.text(levelLabel(cell.getValue().level()))));
         TableColumn<DiagnosticEntry, String> source = UiSupport.column("Source", 180);
         source.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().source()));
         TableColumn<DiagnosticEntry, String> message = UiSupport.column("Message", 500);

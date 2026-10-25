@@ -12,6 +12,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 import java.util.List;
 
@@ -32,6 +33,20 @@ public final class NameGenerationPage implements Page {
         if (!generator.profiles().isEmpty()) {
             profileSelector.setValue(generator.profiles().getFirst());
         }
+        profileSelector.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(NameProfile profile) {
+                return profile == null ? "" : Localization.text(profile.name());
+            }
+
+            @Override
+            public NameProfile fromString(String value) {
+                return generator.profiles().stream()
+                        .filter(profile -> Localization.text(profile.name()).equals(value))
+                        .findFirst()
+                        .orElse(null);
+            }
+        });
         profileSelector.setOnAction(event -> refreshProfileDetails());
 
         Button generateButton = UiSupport.button("Generate sample set", this::generateSampleSet);
@@ -73,10 +88,10 @@ public final class NameGenerationPage implements Page {
             generatedNames.getItems().clear();
             return;
         }
-        profileSummary.setText(profile.description()
-                + "\nStrategy: " + profile.strategy()
-                + "\nMaximum attempts: " + profile.maxAttempts());
-        generationSummary.setText("Selected profile: " + profile.name());
+        profileSummary.setText(Localization.text(profile.description())
+                + "\n" + Localization.text("Strategy: ") + Localization.text(profile.strategy().name())
+                + "\n" + Localization.text("Maximum attempts: ") + profile.maxAttempts());
+        generationSummary.setText(Localization.text("Selected profile: ") + Localization.text(profile.name()));
     }
 
     private void generateSampleSet() {
@@ -86,6 +101,6 @@ public final class NameGenerationPage implements Page {
         }
         List<String> names = generator.generateMany(profile, 8, true);
         generatedNames.getItems().setAll(names);
-        generationSummary.setText("Generated 8 names for: " + profile.name());
+        generationSummary.setText(Localization.text("Generated 8 names for: ") + Localization.text(profile.name()));
     }
 }

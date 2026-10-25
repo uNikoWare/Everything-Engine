@@ -31,8 +31,9 @@ public final class TestingPage implements Page {
                 "Testing Center", "Run the project's fixed Maven test goal without blocking the interface."));
         prerequisites.getStyleClass().add("muted");
         prerequisites.setText(context.projectRoot() == null
-                ? "Unavailable: no pom.xml was found from the current working directory."
-                : "Project: " + context.projectRoot() + " · Command: mvn -B test");
+                ? Localization.text("Unavailable: no pom.xml was found from the current working directory.")
+                : Localization.text("Project: ") + context.projectRoot() + " · "
+                        + Localization.text("Command: ") + "mvn -B test");
         runButton.getStyleClass().add("primary-button");
         runButton.setDisable(context.projectRoot() == null);
         runButton.setOnAction(event -> runTests());
@@ -67,8 +68,8 @@ public final class TestingPage implements Page {
         service.setOnRunning(event -> {
             runButton.setDisable(true);
             progress.setVisible(true);
-            result.setText("Running");
-            totals.setText("Maven test process is running in the background.");
+            result.setText(Localization.text("Running"));
+            totals.setText(Localization.text("Maven test process is running in the background."));
             context.diagnostics().info("Testing", "Started Maven test run.");
         });
         service.setOnSucceeded(event -> {
@@ -83,7 +84,7 @@ public final class TestingPage implements Page {
             runButton.setDisable(false);
             Throwable error = service.getException();
             String message = error == null ? "Test process failed." : error.getMessage();
-            result.setText("Error");
+            result.setText(Localization.text("Error"));
             totals.setText(message);
             output.setText(message == null ? "Unknown test runner error." : message);
             context.setLastTestResult(new TestRunResult(
@@ -95,9 +96,10 @@ public final class TestingPage implements Page {
     }
 
     private void showResult(TestRunResult run) {
-        result.setText(run.status().name());
-        totals.setText(run.passed() + " passed · " + run.failed() + " failed · "
-                + run.skipped() + " skipped · " + UiSupport.duration(run.duration())
+        result.setText(Localization.text(run.status().name()));
+        totals.setText(run.passed() + " " + Localization.text("passed") + " · "
+                + run.failed() + " " + Localization.text("failed") + " · "
+                + run.skipped() + " " + Localization.text("skipped") + " · " + UiSupport.duration(run.duration())
                 + "\n" + run.message());
         output.setText(run.output());
         if (run.output().isBlank()) {

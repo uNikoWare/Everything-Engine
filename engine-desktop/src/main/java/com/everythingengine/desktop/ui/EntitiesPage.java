@@ -32,6 +32,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +70,17 @@ public final class EntitiesPage implements Page {
         search.textProperty().addListener((observable, before, after) -> updateFilter());
         typeFilter.getItems().add("All Types");
         typeFilter.setValue("All Types");
+        typeFilter.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(String value) {
+                return value == null ? "" : Localization.text(value);
+            }
+
+            @Override
+            public String fromString(String value) {
+                return Localization.text("All Types").equals(value) ? "All Types" : value;
+            }
+        });
         typeFilter.setOnAction(event -> updateFilter());
         toolbar.getItems().addAll(search, typeFilter,
                 UiSupport.button("New Entity", this::createEntity),
@@ -220,12 +232,13 @@ public final class EntitiesPage implements Page {
 
     private void createEntity() {
         TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Create Entity");
-        dialog.setHeaderText("Create a general-purpose entity");
-        dialog.setContentText("Name:");
+        dialog.setTitle(Localization.text("Create Entity"));
+        dialog.setHeaderText(Localization.text("Create a general-purpose entity"));
+        dialog.setContentText(Localization.text("Name:"));
         dialog.showAndWait().ifPresent(name -> {
             try {
                 context.universe().registerEntity(new BasicEntity(name));
+                context.autosaveUniverse();
                 context.diagnostics().info("Entities", "Registered entity: " + name);
                 refresh();
             } catch (RuntimeException exception) {
@@ -239,6 +252,7 @@ public final class EntitiesPage implements Page {
         if (selectedEntity == null) {
             try {
                 context.universe().registerEntity(new BasicEntity(generatedName));
+                context.autosaveUniverse();
                 context.diagnostics().info("Entities", "Registered generated entity: " + generatedName);
                 refresh();
             } catch (RuntimeException exception) {
@@ -249,6 +263,7 @@ public final class EntitiesPage implements Page {
 
         try {
             selectedEntity.setName(generatedName);
+            context.autosaveUniverse();
             context.diagnostics().info("Entities", "Renamed entity " + selectedEntity.id() + " to " + generatedName);
             refresh();
             entities.getSelectionModel().select(selectedEntity);
@@ -278,12 +293,13 @@ public final class EntitiesPage implements Page {
             return;
         }
         TextInputDialog dialog = new TextInputDialog(selectedEntity.name());
-        dialog.setTitle("Rename Entity");
-        dialog.setHeaderText("Update the entity name");
-        dialog.setContentText("Name:");
+        dialog.setTitle(Localization.text("Rename Entity"));
+        dialog.setHeaderText(Localization.text("Update the entity name"));
+        dialog.setContentText(Localization.text("Name:"));
         dialog.showAndWait().ifPresent(name -> {
             try {
                 selectedEntity.setName(name);
+                context.autosaveUniverse();
                 context.diagnostics().info("Entities", "Renamed entity " + selectedEntity.id());
                 refresh();
                 entities.getSelectionModel().select(selectedEntity);
@@ -297,14 +313,23 @@ public final class EntitiesPage implements Page {
         if (selectedEntity == null) {
             return;
         }
+        ButtonType delete = new ButtonType(
+                Localization.text("OK"), javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
-                "Delete this entity and its connected relations?", ButtonType.CANCEL, ButtonType.OK);
-        confirmation.setHeaderText("Delete " + selectedEntity.name() + "?");
-        confirmation.showAndWait().filter(ButtonType.OK::equals).ifPresent(ignored -> {
-            context.universe().removeEntity(selectedEntity.id());
-            context.diagnostics().info("Entities", "Removed entity and connected relations.");
-            showDetails(null);
-            refresh();
+                Localization.text("Delete this entity and its connected relations?"),
+                new ButtonType(Localization.text("Cancel"), javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE),
+                delete);
+        confirmation.setHeaderText(Localization.text("Delete ") + selectedEntity.name() + "?");
+        confirmation.showAndWait().filter(delete::equals).ifPresent(ignored -> {
+            try {
+                context.universe().removeEntity(selectedEntity.id());
+                context.autosaveUniverse();
+                context.diagnostics().info("Entities", "Removed entity and connected relations.");
+                showDetails(null);
+                refresh();
+            } catch (RuntimeException exception) {
+                report("Could not delete entity", exception);
+            }
         });
     }
 
@@ -313,28 +338,47 @@ public final class EntitiesPage implements Page {
             return;
         }
         Dialog<AttributeForm> dialog = new Dialog<>();
-        dialog.setTitle("Add Attribute");
-        dialog.setHeaderText("Add a typed attribute");
-        ButtonType add = new ButtonType("Add", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(add, ButtonType.CANCEL);
+        dialog.setTitle(Localization.text("Add Attribute"));
+        dialog.setHeaderText(Localization.text("Add a typed attribute"));
+        ButtonType add = new ButtonType(
+                Localization.text("Add"), javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType(
+                Localization.text("Cancel"), javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(add, cancel);
         TextField key = new TextField();
         TextField value = new TextField();
         ComboBox<String> type = new ComboBox<>();
         type.getItems().setAll("String", "Integer", "Decimal", "Boolean");
         type.setValue("String");
+        type.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(String value) {
+                return Localization.text(value);
+            }
+
+            @Override
+            public String fromString(String value) {
+                return type.getItems().stream()
+                        .filter(item -> Localization.text(item).equals(value))
+                        .findFirst()
+                        .orElse(value);
+            }
+        });
         GridPane fields = new GridPane();
         fields.setHgap(10);
         fields.setVgap(10);
-        fields.addRow(0, new Label("Key"), key);
-        fields.addRow(1, new Label("Type"), type);
-        fields.addRow(2, new Label("Value"), value);
+        fields.addRow(0, new Label(Localization.text("Key")), key);
+        fields.addRow(1, new Label(Localization.text("Type")), type);
+        fields.addRow(2, new Label(Localization.text("Value")), value);
         dialog.getDialogPane().setContent(fields);
+        Localization.translate(dialog.getDialogPane());
         dialog.setResultConverter(button -> button == add
                 ? new AttributeForm(key.getText(), type.getValue(), value.getText())
                 : null);
         dialog.showAndWait().ifPresent(form -> {
             try {
                 storeAttribute(selectedEntity, form);
+                context.autosaveUniverse();
                 context.diagnostics().info("Entities", "Updated attribute " + form.key());
                 showDetails(selectedEntity);
             } catch (RuntimeException exception) {
@@ -367,6 +411,7 @@ public final class EntitiesPage implements Page {
         AttributeSnapshot attribute = attributes.getSelectionModel().getSelectedItem();
         try {
             removeAttribute(selectedEntity, attribute.name(), attribute.type());
+            context.autosaveUniverse();
             showDetails(selectedEntity);
         } catch (RuntimeException exception) {
             report("Could not remove attribute", exception);

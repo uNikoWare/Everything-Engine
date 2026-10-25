@@ -5,17 +5,22 @@ import com.everythingengine.desktop.diagnostics.DiagnosticService;
 import com.everythingengine.desktop.module.ModuleDescriptor;
 import com.everythingengine.desktop.module.ModuleRegistry;
 import com.everythingengine.desktop.module.ModuleStatus;
+import com.everythingengine.desktop.persistence.UniversePersistence;
 import com.everythingengine.desktop.settings.SettingsStore;
 import com.everythingengine.desktop.testing.MavenTestService;
 import com.everythingengine.desktop.testing.TestRunResult;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class DesktopContext {
-    private final Universe universe = new Universe();
+    private Universe universe = new Universe();
     private final DiagnosticService diagnostics = new DiagnosticService();
     private final ModuleRegistry modules = new ModuleRegistry();
     private final SettingsStore settings = new SettingsStore(diagnostics);
+    private final UniversePersistence universePersistence = new UniversePersistence();
+    private final Path universeFile = settings.settingsFile().getParent().resolve("universe.eeu");
     private final Path projectRoot = MavenTestService.locateProjectRoot(Path.of(System.getProperty("user.dir")));
     private TestRunResult lastTestResult;
 
@@ -44,7 +49,16 @@ public final class DesktopContext {
                 "JavaFX development and inspection tools.", java.util.List.of(),
                 java.util.List.of("Universe inspection", "Diagnostics")), ModuleStatus.ACTIVE);
         diagnostics.info("Application",
-                "Engine Core and generation modules initialized; current universe is in-memory only.");
+                "Engine Core and generation modules initialized; universe autosave is enabled.");
+        if (Files.exists(universeFile)) {
+            try {
+                universe = universePersistence.load(universeFile);
+                diagnostics.info("Persistence", "Loaded saved universe from " + universeFile);
+            } catch (IOException | RuntimeException exception) {
+                diagnostics.error("Persistence", "Could not load saved universe; starting with an empty universe.",
+                        exception);
+            }
+        }
         if (projectRoot == null) {
             diagnostics.warning("Testing", "No Maven project was found from the current working directory.");
         }
@@ -52,6 +66,30 @@ public final class DesktopContext {
 
     public Universe universe() {
         return universe;
+    }
+
+    public Path universeFile() {
+        return universeFile;
+    }
+
+    public void saveUniverse(Path file) throws IOException {
+        universePersistence.save(universe, file);
+    }
+
+    public void loadUniverse(Path file) throws IOException {
+        Universe loaded = universePersistence.load(file);
+        universePersistence.save(loaded, universeFile);
+        universe = loaded;
+    }
+
+    public void autosaveUniverse() {
+        try {
+            universePersistence.save(universe, universeFile);
+        } catch (IOException exception) {
+            diagnostics.error("Persistence", "Could not automatically save the universe.", exception);
+            throw new IllegalStateException("Could not automatically save the universe: "
+                    + exception.getMessage(), exception);
+        }
     }
 
     public DiagnosticService diagnostics() {

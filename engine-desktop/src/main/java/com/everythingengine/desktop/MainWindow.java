@@ -6,6 +6,7 @@ import com.everythingengine.desktop.ui.EntitiesPage;
 import com.everythingengine.desktop.ui.LogsPage;
 import com.everythingengine.desktop.ui.ModulesPage;
 import com.everythingengine.desktop.ui.NameGenerationPage;
+import com.everythingengine.desktop.ui.Localization;
 import com.everythingengine.desktop.ui.Page;
 import com.everythingengine.desktop.ui.RelationsPage;
 import com.everythingengine.desktop.ui.SettingsPage;
@@ -39,10 +40,23 @@ public final class MainWindow {
     private final Label status = new Label("Ready · Universe is in memory");
     private final Label globalStatus = new Label();
     private Scene scene;
+    private String currentPage = "Dashboard";
 
     public MainWindow(DesktopContext context) {
         this.context = context;
+        Localization.setLanguage(context.settings().language());
+        rebuildPages();
+        root.setTop(createHeader());
+        root.setLeft(createNavigation());
+        root.setCenter(content);
+        root.setBottom(createStatusBar());
+        root.getStyleClass().add("app-root");
+        showPage(currentPage);
+    }
+
+    private void rebuildPages() {
         Consumer<String> navigate = this::showPage;
+        pages.clear();
         pages.put("Dashboard", new DashboardPage(context, navigate));
         pages.put("Universe", new UniversePage(context));
         pages.put("Entities", new EntitiesPage(context));
@@ -54,13 +68,15 @@ public final class MainWindow {
         pages.put("Name Generation", new NameGenerationPage());
         pages.put("Testing", new TestingPage(context));
         pages.put("Logs", new LogsPage(context));
-        pages.put("Settings", new SettingsPage(context, this::applyTheme));
+        pages.put("Settings", new SettingsPage(context, this::applyTheme, this::languageChanged));
+    }
+
+    private void languageChanged() {
+        Localization.setLanguage(context.settings().language());
+        rebuildPages();
         root.setTop(createHeader());
         root.setLeft(createNavigation());
-        root.setCenter(content);
-        root.setBottom(createStatusBar());
-        root.getStyleClass().add("app-root");
-        showPage("Dashboard");
+        showPage(currentPage);
     }
 
     public BorderPane root() {
@@ -89,7 +105,7 @@ public final class MainWindow {
         logo.setSmooth(true);
         Label name = new Label("EVERYTHING ENGINE");
         name.getStyleClass().add("brand");
-        Label edition = new Label("DEVELOPMENT WORKSPACE");
+        Label edition = new Label(Localization.text("DEVELOPMENT WORKSPACE", context.settings().language()));
         edition.getStyleClass().add("eyebrow");
         VBox branding = new VBox(4, name, edition);
         Region spacer = new Region();
@@ -111,7 +127,7 @@ public final class MainWindow {
         section.getStyleClass().add("eyebrow");
         navigation.getChildren().add(section);
         for (String pageName : pages.keySet()) {
-            Button button = new Button(pageName);
+            Button button = new Button(Localization.text(pageName, context.settings().language()));
             button.setMaxWidth(Double.MAX_VALUE);
             button.setAlignment(Pos.CENTER_LEFT);
             button.getStyleClass().add("navigation-button");
@@ -134,13 +150,22 @@ public final class MainWindow {
         if (page == null) {
             return;
         }
+        currentPage = pageName;
         content.getChildren().setAll(page.node());
         page.onShown();
+        Localization.translate(page.node(), context.settings().language());
         long errors = context.diagnostics().errorCount();
-        globalStatus.setText(errors == 0 ? "CORE READY · NO ERRORS" : "CORE READY · " + errors + " ERRORS");
+        globalStatus.setText(errors == 0
+                ? Localization.text("CORE READY · NO ERRORS", context.settings().language())
+                : Localization.text("CORE READY · ", context.settings().language()) + errors
+                        + (context.settings().language() == com.everythingengine.desktop.settings.Language.GERMAN
+                                ? " FEHLER" : " ERRORS"));
         navigationButtons.forEach((name, button) ->
                 button.pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("selected"),
                         name.equals(pageName)));
-        status.setText(pageName + " · In-memory universe · No persistence configured");
+        status.setText(Localization.text(pageName, context.settings().language())
+                + (context.settings().language() == com.everythingengine.desktop.settings.Language.GERMAN
+                        ? " · Universum wird automatisch gespeichert"
+                        : " · Universe autosaved"));
     }
 }

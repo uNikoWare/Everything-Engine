@@ -16,9 +16,9 @@ public final class UiSupport {
     }
 
     public static VBox page(String title, String subtitle) {
-        Label heading = new Label(title);
+        Label heading = new Label(Localization.text(title));
         heading.getStyleClass().add("page-title");
-        Label description = new Label(subtitle);
+        Label description = new Label(Localization.text(subtitle));
         description.getStyleClass().add("page-subtitle");
         VBox header = new VBox(5, heading, description);
         header.getStyleClass().add("page-header");
@@ -26,18 +26,18 @@ public final class UiSupport {
     }
 
     public static Button button(String label, Runnable action) {
-        Button button = new Button(label);
+        Button button = new Button(Localization.text(label));
         button.setOnAction(event -> action.run());
         return button;
     }
 
-    public static void showError(String title, RuntimeException exception) {
+    public static void showError(String title, Exception exception) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(title);
-        alert.setContentText(exception.getMessage() == null
+        alert.setTitle(Localization.text(title));
+        alert.setHeaderText(Localization.text(title));
+        alert.setContentText(Localization.text(exception.getMessage() == null
                 ? exception.getClass().getSimpleName()
-                : exception.getMessage());
+                : exception.getMessage()));
         alert.showAndWait();
     }
 
@@ -64,7 +64,7 @@ public final class UiSupport {
     }
 
     public static <S, T> TableColumn<S, T> column(String title, double width) {
-        TableColumn<S, T> column = new TableColumn<>(title);
+        TableColumn<S, T> column = new TableColumn<>(Localization.text(title));
         column.setPrefWidth(width);
         return column;
     }

@@ -120,11 +120,15 @@ public final class RelationsPage implements Page {
             return;
         }
         Dialog<RelationForm> dialog = new Dialog<>();
-        dialog.setTitle("Add Relation");
-        dialog.setHeaderText("Create a directed relationship");
+        dialog.setTitle(Localization.text("Add Relation"));
+        dialog.setHeaderText(Localization.text("Create a directed relationship"));
         javafx.scene.control.ButtonType add =
-                new javafx.scene.control.ButtonType("Add", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(add, javafx.scene.control.ButtonType.CANCEL);
+                new javafx.scene.control.ButtonType(
+                        Localization.text("Add"), javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        javafx.scene.control.ButtonType cancel =
+                new javafx.scene.control.ButtonType(
+                        Localization.text("Cancel"), javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(add, cancel);
         ComboBox<Entity> source = new ComboBox<>();
         ComboBox<Entity> target = new ComboBox<>();
         source.getItems().setAll(registered);
@@ -139,10 +143,11 @@ public final class RelationsPage implements Page {
         GridPane fields = new GridPane();
         fields.setHgap(10);
         fields.setVgap(10);
-        fields.addRow(0, new Label("Source"), source);
-        fields.addRow(1, new Label("Target"), target);
-        fields.addRow(2, new Label("Type key"), relationType);
+        fields.addRow(0, new Label(Localization.text("Source")), source);
+        fields.addRow(1, new Label(Localization.text("Target")), target);
+        fields.addRow(2, new Label(Localization.text("Type key")), relationType);
         dialog.getDialogPane().setContent(fields);
+        Localization.translate(dialog.getDialogPane());
         dialog.setResultConverter(button -> button == add
                 ? new RelationForm(source.getValue(), target.getValue(), relationType.getText())
                 : null);
@@ -150,6 +155,7 @@ public final class RelationsPage implements Page {
             try {
                 context.universe().addRelation(new Relation(
                         form.source(), form.target(), new com.everythingengine.core.relation.RelationType(form.type())));
+                context.autosaveUniverse();
                 context.diagnostics().info("Relations", "Registered relation type " + form.type());
                 refresh();
             } catch (RuntimeException exception) {
@@ -172,8 +178,14 @@ public final class RelationsPage implements Page {
     private void removeRelation() {
         Relation selected = table.getSelectionModel().getSelectedItem();
         if (selected != null && context.universe().removeRelation(selected.id())) {
-            context.diagnostics().info("Relations", "Removed relation " + selected.id());
-            refresh();
+            try {
+                context.autosaveUniverse();
+                context.diagnostics().info("Relations", "Removed relation " + selected.id());
+                refresh();
+            } catch (RuntimeException exception) {
+                context.diagnostics().error("Relations", "Could not save the removed relation.", exception);
+                UiSupport.showError("Could not save universe", exception);
+            }
         }
     }
 
@@ -185,8 +197,8 @@ public final class RelationsPage implements Page {
     }
 
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
-        alert.setHeaderText("Relation not available");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, Localization.text(message));
+        alert.setHeaderText(Localization.text("Relation not available"));
         alert.showAndWait();
     }
 
