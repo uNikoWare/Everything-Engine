@@ -127,7 +127,7 @@ public final class DashboardPage implements Page {
                 quickButton("Explore entities", "Entities"),
                 quickButton("View relations", "Relations"),
                 quickButton("Manage modules", "Modules"),
-                quickButton("Generate names", "Name Generation"),
+                quickButton("Generate names", "Generation"),
                 quickButton("Run tests", "Testing"));
         VBox box = new VBox(12, title, actions);
         box.setPadding(new Insets(8, 0, 0, 0));

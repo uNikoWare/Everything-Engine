@@ -16,7 +16,7 @@ import javafx.util.StringConverter;
 
 import java.util.List;
 
-public final class NameGenerationPage implements Page {
+public final class NameGenerationPanel {
     private final NameGenerator generator = new NameGenerator(202406L);
     private final ComboBox<NameProfile> profileSelector = new ComboBox<>();
     private final ListView<String> generatedNames = new ListView<>();
@@ -24,7 +24,7 @@ public final class NameGenerationPage implements Page {
     private final Label generationSummary = new Label();
     private final VBox root = new VBox(16);
 
-    public NameGenerationPage() {
+    public NameGenerationPanel() {
         generator.registerProfile(NameProfiles.exoticSyllableProfile());
         generator.registerProfile(NameProfiles.compoundLocationProfile());
         generator.registerProfile(NameProfiles.technicalTemplateProfile());
@@ -61,10 +61,6 @@ public final class NameGenerationPage implements Page {
         generationSummary.getStyleClass().add("section-title");
         generatedNames.setPrefHeight(260);
 
-        root.getStyleClass().add("page");
-        root.getChildren().add(UiSupport.page(
-                "Name Generation",
-                "Preview deterministic generated names for the core naming module."));
         root.getChildren().add(new VBox(8,
                 controls,
                 profileSummary,
@@ -75,7 +71,6 @@ public final class NameGenerationPage implements Page {
         generateSampleSet();
     }
 
-    @Override
     public Node node() {
         return root;
     }

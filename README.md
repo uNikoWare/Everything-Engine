@@ -26,7 +26,7 @@ The Maven reactor has separate `engine-core` and `engine-desktop` modules. JavaF
 
 ## Desktop application
 
-The JavaFX workspace includes Dashboard, Universe, Entities, Relations, Modules, Name Generation, Testing, Logs, and Settings views. The interface supports English and German, with English as the default; choose the language in **Settings**. The entity view can create, rename, remove, and inspect generic entities and typed attributes. Relation records use the core API; entity removal also cleans up its relations.
+The JavaFX workspace includes Dashboard, Universe, Entities, Relations, Modules, Generation, Testing, Logs, and Settings views. The Generation view provides selectable generators, currently including name generation, and is structured to host generators for other objects and concepts. The interface supports English and German, with English as the default; choose the language in **Settings**. The entity view can create, rename, remove, and inspect generic entities and typed attributes. Relation records use the core API; entity removal also cleans up its relations.
 
 Universe changes are automatically saved to `universe.eeu` in the user's application-data directory (`%APPDATA%\EverythingEngine` on Windows). The Universe view also provides **Save Universe** and **Load Universe** for manually exporting or importing `.eeu` files. Files preserve entity and relation UUIDs, names, and String, Integer, Double, and Boolean attributes. Loading a file replaces the current universe and updates the automatic save. Settings (including language and theme) are also persisted in the user's application-data directory.
 

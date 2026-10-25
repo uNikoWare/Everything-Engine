@@ -20,7 +20,12 @@ public final class Localization {
             Map.entry("Entities", "Entitäten"),
             Map.entry("Relations", "Beziehungen"),
             Map.entry("Modules", "Module"),
+            Map.entry("Generation", "Generierung"),
             Map.entry("Name Generation", "Namensgenerator"),
+            Map.entry("Name generation", "Namensgenerierung"),
+            Map.entry("Generation type:", "Generierungstyp:"),
+            Map.entry("Choose a generation type to create names, objects, concepts, and more.",
+                    "Wähle einen Generierungstyp, um Namen, Objekte, Konzepte und mehr zu erstellen."),
             Map.entry("Testing", "Tests"),
             Map.entry("Logs", "Protokolle"),
             Map.entry("Settings", "Einstellungen"),
@@ -305,13 +310,19 @@ public final class Localization {
 
     public static void translate(Node node, Language language) {
         if (node instanceof Labeled labeled) {
-            labeled.setText(text(labeled.getText(), language));
+            if (!labeled.textProperty().isBound()) {
+                labeled.setText(text(labeled.getText(), language));
+            }
         }
         if (node instanceof TextInputControl input) {
-            input.setPromptText(text(input.getPromptText(), language));
+            if (!input.promptTextProperty().isBound()) {
+                input.setPromptText(text(input.getPromptText(), language));
+            }
         }
         if (node instanceof TitledPane titledPane) {
-            titledPane.setText(text(titledPane.getText(), language));
+            if (!titledPane.textProperty().isBound()) {
+                titledPane.setText(text(titledPane.getText(), language));
+            }
         }
         if (node instanceof TableView<?> table) {
             for (TableColumn<?, ?> column : table.getColumns()) {
@@ -324,7 +335,9 @@ public final class Localization {
     }
 
     private static void translateColumn(TableColumn<?, ?> column, Language language) {
-        column.setText(text(column.getText(), language));
+        if (!column.textProperty().isBound()) {
+            column.setText(text(column.getText(), language));
+        }
         column.getColumns().forEach(child -> translateColumn(child, language));
     }
 }

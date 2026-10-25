@@ -10,5 +10,7 @@ class LocalizationTest {
     void translatesEnglishUiLabelsToGermanAndKeepsEnglishDefault() {
         assertEquals("Einstellungen", Localization.text("Settings", Language.GERMAN));
         assertEquals("Settings", Localization.text("Settings", Language.ENGLISH));
+        assertEquals("Generierung", Localization.text("Generation", Language.GERMAN));
+        assertEquals("Namensgenerierung", Localization.text("Name generation", Language.GERMAN));
     }
 }
