@@ -20,12 +20,7 @@ if not defined APP_VERSION (
     echo Could not determine the application version.
     exit /b 1
 )
-for /f %%V in ('powershell -NoProfile -Command "$version = '%APP_VERSION%'; if ($version -notmatch '^v\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:_[a-z])?$') { exit 1 }; '{0}.{1}.{2}' -f ([long]$Matches[1] + 1), $Matches[2], $Matches[3]"') do set "JPACKAGE_VERSION=%%V"
-if not defined JPACKAGE_VERSION (
-    echo Invalid app version in everything-engine.properties: %APP_VERSION%
-    exit /b 1
-)
 
-jpackage --type msi --input engine-desktop\target\package-input --main-jar everything-engine-desktop-1.0-SNAPSHOT.jar --main-class com.everythingengine.desktop.DesktopLauncher --name "Everything Engine" --app-version %JPACKAGE_VERSION% --icon engine-desktop\src\main\resources\icons\everything-engine.ico --dest dist\windows --vendor "Everything Engine" --description "Modular science-fiction universe engine" --win-upgrade-uuid 3e6ccf80-d40f-4b18-a82f-4a5531fb13a1 --win-per-user-install --win-menu --win-menu-group "Everything Engine" --win-shortcut --java-options "--module-path=$APPDIR\lib" --java-options "--add-modules=javafx.controls"
+jpackage --type msi --input engine-desktop\target\package-input --main-jar everything-engine-desktop-1.0-SNAPSHOT.jar --main-class com.everythingengine.desktop.DesktopLauncher --name "Everything Engine" --app-version %APP_VERSION% --icon engine-desktop\src\main\resources\icons\everything-engine.ico --dest dist\windows --vendor "Everything Engine" --description "Modular science-fiction universe engine" --win-upgrade-uuid 3e6ccf80-d40f-4b18-a82f-4a5531fb13a1 --win-per-user-install --win-menu --win-menu-group "Everything Engine" --win-shortcut --java-options "--module-path=$APPDIR\lib" --java-options "--add-modules=javafx.controls"
 if errorlevel 1 exit /b %errorlevel%
 echo Windows MSI installer created in dist\windows\

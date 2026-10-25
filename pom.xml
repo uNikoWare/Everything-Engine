@@ -20,7 +20,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.12.2</junit.version>
         <javafx.version>25.0.1</javafx.version>
+<<<<<<< HEAD
         <desktop.app.version>v.0.2.1</desktop.app.version>
+=======
+        <desktop.app.version>1.0.0</desktop.app.version>
+>>>>>>> parent of 83283fd (v.0.1.1)
     </properties>
 
     <build>
