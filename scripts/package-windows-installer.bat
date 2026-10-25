@@ -21,6 +21,6 @@ if not defined APP_VERSION (
     exit /b 1
 )
 
-jpackage --type msi --input engine-desktop\target\package-input --main-jar everything-engine-desktop-1.0-SNAPSHOT.jar --main-class com.everythingengine.desktop.DesktopLauncher --name "Everything Engine" --app-version %APP_VERSION% --dest dist\windows --vendor "Everything Engine" --description "Modular science-fiction universe engine" --win-upgrade-uuid 3e6ccf80-d40f-4b18-a82f-4a5531fb13a1 --win-per-user-install --win-menu --win-menu-group "Everything Engine" --win-shortcut --java-options "--module-path=$APPDIR\lib" --java-options "--add-modules=javafx.controls"
+jpackage --type msi --input engine-desktop\target\package-input --main-jar everything-engine-desktop-1.0-SNAPSHOT.jar --main-class com.everythingengine.desktop.DesktopLauncher --name "Everything Engine" --app-version %APP_VERSION% --icon engine-desktop\src\main\resources\icons\everything-engine.ico --dest dist\windows --vendor "Everything Engine" --description "Modular science-fiction universe engine" --win-upgrade-uuid 3e6ccf80-d40f-4b18-a82f-4a5531fb13a1 --win-per-user-install --win-menu --win-menu-group "Everything Engine" --win-shortcut --java-options "--module-path=$APPDIR\lib" --java-options "--add-modules=javafx.controls"
 if errorlevel 1 exit /b %errorlevel%
 echo Windows MSI installer created in dist\windows\

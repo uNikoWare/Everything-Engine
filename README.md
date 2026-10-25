@@ -61,6 +61,7 @@ scripts\package-windows-installer.bat
 ```
 
 The MSI is written to `dist\windows\`. Its stable upgrade UUID allows a later MSI release to upgrade the installed application. Increment `desktop.app.version` in the root `pom.xml` for each release.
+The supplied Everything Engine logo appears on the dashboard; its matching icon is used by the app window, packaged application, and installer.
 
 ### In-app updates
 

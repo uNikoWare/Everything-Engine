@@ -7,6 +7,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -31,6 +33,7 @@ public final class DashboardPage implements Page {
         root.getStyleClass().add("page");
         root.getChildren().add(UiSupport.page(
                 "Dashboard", "Engine status and quick access to the current workspace."));
+        root.getChildren().add(brandCard());
         root.getChildren().add(statusCard());
         root.getChildren().add(statistics());
         root.getChildren().add(quickAccess());
@@ -71,6 +74,26 @@ public final class DashboardPage implements Page {
         persistence.getStyleClass().add("muted");
         VBox card = new VBox(10, title, core, universe, errorStatus, persistence);
         card.getStyleClass().add("card");
+        return card;
+    }
+
+    private Node brandCard() {
+        ImageView logo = new ImageView(new Image(
+                getClass().getResource("/images/everything-engine-logo.png").toExternalForm()));
+        logo.setFitWidth(170);
+        logo.setFitHeight(170);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
+        Label title = new Label("Everything Engine");
+        title.getStyleClass().add("section-title");
+        Label description = new Label("A foundation for building and exploring science-fiction universes.");
+        description.getStyleClass().add("page-subtitle");
+        description.setWrapText(true);
+        VBox copy = new VBox(10, title, description);
+        copy.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        HBox card = new HBox(22, logo, copy);
+        card.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        card.getStyleClass().add("brand-card");
         return card;
     }
 

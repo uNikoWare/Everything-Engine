@@ -20,6 +20,10 @@ public final class EverythingEngineApplication extends Application {
             }
             window.applyTheme(scene);
             stage.setTitle("Everything Engine");
+            var appIcon = getClass().getResource("/icons/everything-engine-icon.png");
+            if (appIcon != null) {
+                stage.getIcons().add(new javafx.scene.image.Image(appIcon.toExternalForm()));
+            }
             stage.setMinWidth(960);
             stage.setMinHeight(640);
             stage.setScene(scene);

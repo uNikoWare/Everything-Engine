@@ -38,6 +38,16 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <includes>
+                    <include>everything-engine.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>everything-engine.properties</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>

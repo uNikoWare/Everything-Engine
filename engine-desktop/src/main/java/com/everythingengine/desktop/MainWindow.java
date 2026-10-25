@@ -18,8 +18,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -75,13 +79,21 @@ public final class MainWindow {
     }
 
     private Node createHeader() {
+        ImageView logo = new ImageView(new Image(
+                getClass().getResource("/icons/everything-engine-icon.png").toExternalForm()));
+        logo.setFitWidth(44);
+        logo.setFitHeight(44);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
         Label name = new Label("EVERYTHING ENGINE");
         name.getStyleClass().add("brand");
         Label edition = new Label("DEVELOPMENT WORKSPACE");
         edition.getStyleClass().add("eyebrow");
         VBox branding = new VBox(4, name, edition);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
         globalStatus.getStyleClass().add("status-pill");
-        HBox header = new HBox(18, branding, globalStatus);
+        HBox header = new HBox(14, logo, branding, spacer, globalStatus);
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPadding(new Insets(18, 24, 18, 24));
         header.getStyleClass().add("top-bar");

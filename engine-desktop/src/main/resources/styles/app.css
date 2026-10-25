@@ -33,6 +33,9 @@
 .page-title { -fx-font-size: 25px; -fx-font-weight: bold; }
 .page-subtitle { -fx-font-size: 13px; -fx-text-fill: #91a2b2; }
 .card { -fx-background-color: rgba(90, 115, 135, 0.10); -fx-background-radius: 8; -fx-border-color: rgba(120, 145, 165, 0.16); -fx-border-radius: 8; -fx-padding: 18; -fx-spacing: 10; }
+.brand-card { -fx-background-color: #080d16; -fx-background-radius: 8; -fx-border-color: rgba(120, 145, 165, 0.16); -fx-border-radius: 8; -fx-padding: 12 20; }
+.brand-card .section-title { -fx-text-fill: #edf4fa; -fx-font-size: 20px; }
+.brand-card .page-subtitle { -fx-text-fill: #91a2b2; }
 .card-title { -fx-font-size: 13px; -fx-font-weight: bold; }
 .stat-value { -fx-font-size: 25px; -fx-font-weight: bold; }
 .muted { -fx-text-fill: #91a2b2; }
