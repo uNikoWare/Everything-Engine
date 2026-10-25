@@ -51,6 +51,8 @@ class UpdateManifestTest {
 
     @Test
     void extractsNumericPackageVersionWithoutBranchSuffix() {
+        assertEquals("v.0.2.1", DesktopVersion.current());
+        assertEquals("1.2.1", DesktopVersion.packageVersion(DesktopVersion.current()));
         assertEquals("1.2.0", DesktopVersion.packageVersion("v.0.2.0"));
         assertEquals("1.1.1", DesktopVersion.packageVersion("v.0.1.1"));
         assertEquals("1.1.1", DesktopVersion.packageVersion("v.0.1.1_z"));

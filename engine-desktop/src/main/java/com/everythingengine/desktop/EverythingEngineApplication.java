@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import com.everythingengine.desktop.update.DesktopVersion;
 
 import java.util.Objects;
 
@@ -19,7 +20,7 @@ public final class EverythingEngineApplication extends Application {
                 scene.getStylesheets().add(stylesheet.toExternalForm());
             }
             window.applyTheme(scene);
-            stage.setTitle("Everything Engine");
+            stage.setTitle("Everything Engine " + DesktopVersion.current());
             var appIcon = getClass().getResource("/icons/everything-engine-icon.png");
             if (appIcon != null) {
                 stage.getIcons().add(new javafx.scene.image.Image(appIcon.toExternalForm()));
