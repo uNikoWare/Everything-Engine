@@ -54,7 +54,28 @@ On Windows, the equivalent convenience scripts are `scripts\build.bat` and `scri
 scripts\package-windows.bat
 ```
 
-The packaging script requires a JDK installation that provides `jpackage`. It creates an application image under `dist\windows\Everything Engine\`, including the runtime. An MSI installer is not configured. Put a future application icon at `engine-desktop\src\main\resources\icons\` and pass it to `jpackage` once a project icon is available.
+The packaging script requires a JDK installation that provides `jpackage`. It creates an application image under `dist\windows\Everything Engine\`, including the runtime. To create a per-user Windows MSI installer with Start Menu and desktop shortcuts, install WiX Toolset 3.14.1 and run:
+
+```bat
+scripts\package-windows-installer.bat
+```
+
+The MSI is written to `dist\windows\`. Its stable upgrade UUID allows a later MSI release to upgrade the installed application. Increment `desktop.app.version` in the root `pom.xml` for each release.
+
+### In-app updates
+
+In **Settings**, enter and save the HTTPS URL of a trusted update manifest, then select **Check for Updates**. When a newer version is available, the app downloads its MSI, verifies the SHA-256 checksum, closes, applies the per-user upgrade, and restarts. The updater rejects non-HTTPS URLs and invalid manifests; updates are never installed without a valid checksum.
+
+Host the MSI and a UTF-8 Java-properties manifest at an HTTPS location. Publish the MSI first, then publish a manifest such as:
+
+```properties
+version=1.1.0
+installerUrl=https://downloads.example.org/Everything-Engine-1.1.0.msi
+sha256=64-character-lowercase-or-uppercase-SHA-256-hex-digest
+releaseNotes=What changed in this release
+```
+
+Replace the checksum placeholder with the 64-character SHA-256 digest of the exact MSI at `installerUrl`. Keep the manifest URL configurable in each installation; this project does not provide or host a release feed. Automatic MSI installation is available in the packaged Windows app, not when running from Maven or a non-Windows development environment.
 
 ## Tests and limitations
 

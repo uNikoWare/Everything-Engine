@@ -1,6 +1,7 @@
 package com.everythingengine.desktop.settings;
 
 import com.everythingengine.desktop.diagnostics.DiagnosticService;
+import com.everythingengine.desktop.update.UpdateClient;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,7 @@ public final class SettingsStore {
     private final Path settingsFile;
     private final DiagnosticService diagnostics;
     private Theme theme = Theme.DARK;
+    private String updateManifestUrl = "";
 
     public SettingsStore(DiagnosticService diagnostics) {
         this.diagnostics = diagnostics;
@@ -30,13 +32,27 @@ public final class SettingsStore {
         return settingsFile;
     }
 
+    public String updateManifestUrl() {
+        return updateManifestUrl;
+    }
+
     public void setTheme(Theme theme) throws IOException {
         this.theme = Objects.requireNonNull(theme, "theme");
-        Properties properties = new Properties();
-        properties.setProperty("theme", theme.name());
-        Files.createDirectories(settingsFile.getParent());
-        try (OutputStream output = Files.newOutputStream(settingsFile)) {
-            properties.store(output, "Everything Engine settings");
+        save();
+    }
+
+    public void setUpdateManifestUrl(String url) throws IOException {
+        String normalized = Objects.requireNonNull(url, "url").trim();
+        if (!normalized.isEmpty()) {
+            UpdateClient.validateHttpsUri(normalized);
+        }
+        String previousUrl = updateManifestUrl;
+        updateManifestUrl = normalized;
+        try {
+            save();
+        } catch (IOException exception) {
+            updateManifestUrl = previousUrl;
+            throw exception;
         }
     }
 
@@ -48,9 +64,24 @@ public final class SettingsStore {
         try (InputStream input = Files.newInputStream(settingsFile)) {
             properties.load(input);
             theme = Theme.valueOf(properties.getProperty("theme", "DARK").toUpperCase(Locale.ROOT));
+            updateManifestUrl = properties.getProperty("update.manifest.url", "").trim();
+            if (!updateManifestUrl.isEmpty()) {
+                UpdateClient.validateHttpsUri(updateManifestUrl);
+            }
         } catch (IOException | IllegalArgumentException exception) {
             diagnostics.warning("Settings", "Could not load settings; using defaults: " + exception.getMessage());
             theme = Theme.DARK;
+            updateManifestUrl = "";
+        }
+    }
+
+    private void save() throws IOException {
+        Properties properties = new Properties();
+        properties.setProperty("theme", theme.name());
+        properties.setProperty("update.manifest.url", updateManifestUrl);
+        Files.createDirectories(settingsFile.getParent());
+        try (OutputStream output = Files.newOutputStream(settingsFile)) {
+            properties.store(output, "Everything Engine settings");
         }
     }
 
