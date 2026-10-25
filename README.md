@@ -15,6 +15,9 @@ engine-desktop  ───────→  engine-core
 - `core.attribute.AttributeKey<T>` couples a stable key to a Java value type. `Entity.attributes()` exposes read-only attribute snapshots for inspection. Values are held by reference, so immutable values are recommended.
 - `core.relation.Relation` is an immutable directed edge with a UUID, source, target, and extensible `RelationType` key.
 - `core.universe.Universe` owns entities and relations. Its UUID maps and source, target, and type indexes support lookups; removing an entity also removes all connected relations.
+- `core.random.*` adds deterministic seeded generation, weighted-choice selection, and reproducible helpers for data generation and tests.
+- `core.validation.*` provides reusable validation rules, issue aggregation, and warnings/errors reporting for core and future domain logic.
+- `core.name.*` contains profile-driven name generation with syllable, word, and template strategies, plus duplicate-avoidance support.
 - `desktop` depends on the public core API only. `DesktopContext` explicitly assembles the in-memory universe, diagnostics, settings, and module registry.
 
 Entity and relation equality uses UUID identity. Duplicate UUIDs and incompatible attribute types are rejected. Relation endpoints must be the exact registered entity objects; self-relations are allowed. Collection results are immutable snapshots. There is no separate `EntityManager`, because `Universe` already owns that responsibility.
@@ -25,7 +28,7 @@ The Maven reactor has separate `engine-core` and `engine-desktop` modules. JavaF
 
 The JavaFX workspace includes Dashboard, Universe, Entities, Relations, Modules, Testing, Logs, and Settings views. The entity view can create, rename, remove, and inspect generic entities and typed attributes. Relation records use the core API; entity removal also cleans up its relations. The universe is in-memory only and is never presented as saved.
 
-The module manager lists the two actual running components (core and desktop). There are no domain extension modules in this project. Dynamic JAR loading, module activation/deactivation, and plugin discovery are not implemented. The dark/light theme preference is persisted in the user's application-data directory. Diagnostics use `java.util.logging`.
+The module manager lists the built-in core and desktop components and the generation-related core modules (randomization, validation, and naming). There are no dynamically loaded extension modules in this project. Dynamic JAR loading, module activation/deactivation, and plugin discovery are not implemented. The dark/light theme preference is persisted in the user's application-data directory. Diagnostics use `java.util.logging`.
 
 The Testing Center invokes only the fixed `mvn -B test` goal, asynchronously. It requires a Maven project directory to be discoverable from the app's working directory and Maven installed on `PATH`; test totals are read from Surefire reports. If either prerequisite is missing, testing reports an error rather than fabricated results.
 

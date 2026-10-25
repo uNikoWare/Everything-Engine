@@ -1,5 +1,6 @@
 package com.everythingengine.desktop.module;
 
+import com.everythingengine.desktop.DesktopContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -20,6 +21,16 @@ class ModuleRegistryTest {
         assertEquals(ModuleStatus.ACTIVE, registry.modules().getFirst().status());
         assertThrows(IllegalArgumentException.class, () -> registry.register(desktop, ModuleStatus.ACTIVE));
         assertThrows(UnsupportedOperationException.class, () -> registry.modules().clear());
+    }
+
+    @Test
+    void registersBuiltInGenerationModulesInDesktopContext() {
+        DesktopContext context = new DesktopContext();
+        var ids = context.modules().modules().stream().map(item -> item.descriptor().id()).toList();
+
+        assertTrue(ids.contains("everything-engine.core.randomization"));
+        assertTrue(ids.contains("everything-engine.core.validation"));
+        assertTrue(ids.contains("everything-engine.core.naming"));
     }
 
     @Test

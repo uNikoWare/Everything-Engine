@@ -4,6 +4,8 @@ import com.everythingengine.core.attribute.AttributeKey;
 import com.everythingengine.core.attribute.AttributeSnapshot;
 import com.everythingengine.core.entity.BasicEntity;
 import com.everythingengine.core.entity.Entity;
+import com.everythingengine.core.name.NameGenerator;
+import com.everythingengine.core.name.NameProfiles;
 import com.everythingengine.core.relation.Relation;
 import com.everythingengine.desktop.DesktopContext;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -48,10 +50,14 @@ public final class EntitiesPage implements Page {
     private final Label selectedName = new Label("Select an entity");
     private final Label selectedId = new Label();
     private final Label attributeEmpty = new Label();
+    private final NameGenerator nameGenerator = new NameGenerator(202406L);
     private Entity selectedEntity;
 
     public EntitiesPage(DesktopContext context) {
         this.context = context;
+        nameGenerator.registerProfile(NameProfiles.exoticSyllableProfile());
+        nameGenerator.registerProfile(NameProfiles.compoundLocationProfile());
+        nameGenerator.registerProfile(NameProfiles.technicalTemplateProfile());
         root.getStyleClass().add("page");
         root.getChildren().add(UiSupport.page(
                 "Entity Explorer", "Find, inspect and manage registered entities and their attributes."));
@@ -66,6 +72,7 @@ public final class EntitiesPage implements Page {
         typeFilter.setOnAction(event -> updateFilter());
         toolbar.getItems().addAll(search, typeFilter,
                 UiSupport.button("New Entity", this::createEntity),
+                UiSupport.button("Generate Name", this::generateNameForSelection),
                 UiSupport.button("Rename", this::renameEntity),
                 UiSupport.button("Delete", this::deleteEntity));
         root.getChildren().add(toolbar);
@@ -225,6 +232,45 @@ public final class EntitiesPage implements Page {
                 report("Could not create entity", exception);
             }
         });
+    }
+
+    private void generateNameForSelection() {
+        String generatedName = generateUniqueEntityName();
+        if (selectedEntity == null) {
+            try {
+                context.universe().registerEntity(new BasicEntity(generatedName));
+                context.diagnostics().info("Entities", "Registered generated entity: " + generatedName);
+                refresh();
+            } catch (RuntimeException exception) {
+                report("Could not generate entity name", exception);
+            }
+            return;
+        }
+
+        try {
+            selectedEntity.setName(generatedName);
+            context.diagnostics().info("Entities", "Renamed entity " + selectedEntity.id() + " to " + generatedName);
+            refresh();
+            entities.getSelectionModel().select(selectedEntity);
+        } catch (RuntimeException exception) {
+            report("Could not rename entity", exception);
+        }
+    }
+
+    private String generateUniqueEntityName() {
+        List<String> existingNames = context.universe().entities().stream()
+                .map(Entity::name)
+                .toList();
+
+        for (var profile : nameGenerator.profiles()) {
+            for (String candidate : nameGenerator.generateMany(profile, 3, true)) {
+                if (!existingNames.contains(candidate)) {
+                    return candidate;
+                }
+            }
+        }
+
+        return "Generated-Entity-" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     private void renameEntity() {

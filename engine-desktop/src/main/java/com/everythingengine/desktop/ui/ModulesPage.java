@@ -60,7 +60,7 @@ public final class ModulesPage implements Page {
 
     private void refresh() {
         modules.getItems().setAll(context.modules().modules());
-        extensionStatus.setText("No extension modules are registered. Dynamic loading and activation are not implemented.");
+        extensionStatus.setText("Built-in core modules are registered. Dynamic loading and activation for extension modules remain unimplemented.");
         if (!modules.getItems().isEmpty() && modules.getSelectionModel().getSelectedItem() == null) {
             modules.getSelectionModel().selectFirst();
         }

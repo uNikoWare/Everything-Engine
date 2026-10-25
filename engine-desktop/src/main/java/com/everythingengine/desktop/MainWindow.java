@@ -5,6 +5,7 @@ import com.everythingengine.desktop.ui.DashboardPage;
 import com.everythingengine.desktop.ui.EntitiesPage;
 import com.everythingengine.desktop.ui.LogsPage;
 import com.everythingengine.desktop.ui.ModulesPage;
+import com.everythingengine.desktop.ui.NameGenerationPage;
 import com.everythingengine.desktop.ui.Page;
 import com.everythingengine.desktop.ui.RelationsPage;
 import com.everythingengine.desktop.ui.SettingsPage;
@@ -50,6 +51,7 @@ public final class MainWindow {
             ((EntitiesPage) pages.get("Entities")).selectEntity(id);
         }));
         pages.put("Modules", new ModulesPage(context));
+        pages.put("Name Generation", new NameGenerationPage());
         pages.put("Testing", new TestingPage(context));
         pages.put("Logs", new LogsPage(context));
         pages.put("Settings", new SettingsPage(context, this::applyTheme));
