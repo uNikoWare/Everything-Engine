@@ -30,6 +30,33 @@ The JavaFX workspace includes Dashboard, Universe, Entities, Relations, Modules,
 
 Universe changes are automatically saved to `universe.eeu` in the user's application-data directory (`%APPDATA%\EverythingEngine` on Windows). The Universe view also provides **Save Universe** and **Load Universe** for manually exporting or importing `.eeu` files. Files preserve entity and relation UUIDs, names, and String, Integer, Double, and Boolean attributes. Loading a file replaces the current universe and updates the automatic save. Settings (including language and theme) are also persisted in the user's application-data directory.
 
+## Galactic model modules
+
+The core astronomy packages are JavaFX-independent and reuse the existing `Entity`, `Relation`, `Universe`, seeded-random, name-generation, and validation APIs. Coordinate positions use a right-handed Cartesian frame (`+X × +Y = +Z`) and parsecs; coordinate frames have explicit identities, and positions cannot be compared across frames without a `CoordinateTransform`. Rotations are rigid, right-handed orthonormal matrices with parsec translations. Relativistic transforms and astrophysical simulations are intentionally out of scope.
+
+`core.galaxy` models a galaxy independently of any materialized population. Its morphology identifiers are extensible; built-ins cover spiral, barred spiral, elliptical, lenticular, and irregular galaxies. `core.galaxy.structure` models separately identified cores, bulges, disks, spiral arms, bars, haloes, and named regions with typed geometry. `core.distribution` provides seeded uniform-volume ellipsoid, disk, radial (`p(r) ∝ r^power`; power 2 means uniform volume density), and perturbed logarithmic-spiral samplers. These are geometric generation assumptions, not claims of realistic stellar density.
+
+`core.stellar` provides typed stellar systems and stars. Physical values use solar masses, solar radii, solar luminosities, kelvin, years, and [Fe/H] dex; unavailable observations remain optional. Constructors reject invalid numeric domains, while `StellarValidation` reports unusual-but-permitted values as warnings. Multi-star membership and galaxy ownership are represented using standard `Universe` relations rather than parallel collections.
+
+A generator returns a staged result before changing the universe. Call `register` only after checking `isValid`; `Universe.registerBatch` checks all entity IDs and relation endpoints before mutating the registry. An identical configuration and seed produces the same generated names, positions, and IDs within this implementation version; future algorithm changes may change results. Reusing a seed for another committed generation in the same universe therefore conflicts by design.
+
+```java
+CoordinateSpace frame = new CoordinateSpace("universe");
+Universe universe = new Universe();
+Position3D origin = new Position3D(frame, 0, 0, 0);
+GalaxyGenerationConfig config = new GalaxyGenerationConfig(
+        "Example Galaxy", GalaxyType.SPIRAL, origin, GalaxyExtent.spherical(50_000),
+        GalaxyGenerationMode.POPULATION, 500,
+        Optional.of(new DiskDistribution(40_000, 2_000)),
+        Optional.empty(), false, 42L);
+GalaxyGenerationResult result = new GalaxyGenerator().generate(config);
+if (result.isValid()) {
+    result.register(universe);
+}
+```
+
+Structural mode creates a galaxy and its foundational structures without systems; population mode accepts 0–10,000 explicit systems. The estimated galaxy star count is separate from generated systems. Generated system names are profile-driven and may repeat; entity identities remain unique and seed-derived. The desktop **Generation** tab exposes both name and galaxy generation, runs generation off the UI thread, and displays real results. `SpatialIndex<T>` is a rebuildable linear index for radius, axis-aligned bounds, and nearest-neighbor queries; position changes become visible after `upsert` or `rebuild`, and indexed values remain owned by the universe. Universe file format 2 preserves these typed astronomy models and still reads format 1 files.
+
 The module manager lists the built-in core and desktop components and the generation-related core modules (randomization, validation, and naming). There are no dynamically loaded extension modules in this project. Dynamic JAR loading, module activation/deactivation, and plugin discovery are not implemented. Diagnostics use `java.util.logging`.
 
 The Testing Center invokes only the fixed `mvn -B test` goal, asynchronously. It requires a Maven project directory to be discoverable from the app's working directory and Maven installed on `PATH`; test totals are read from Surefire reports. If either prerequisite is missing, testing reports an error rather than fabricated results.

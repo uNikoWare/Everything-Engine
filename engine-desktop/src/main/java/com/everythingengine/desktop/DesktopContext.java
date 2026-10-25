@@ -45,6 +45,43 @@ public final class DesktopContext {
                 java.util.List.of("everything-engine.core", "everything-engine.core.randomization"),
                 java.util.List.of("Syllable generation", "Word generation", "Template generation")), ModuleStatus.ACTIVE);
         modules.register(new ModuleDescriptor(
+                "everything-engine.core.spatial", "Coordinate System", "1.0",
+                "Typed three-dimensional positions, coordinate spaces and rigid transformations.",
+                java.util.List.of("everything-engine.core"), java.util.List.of("Positions", "Coordinate transforms")),
+                ModuleStatus.ACTIVE);
+        modules.register(new ModuleDescriptor(
+                "everything-engine.core.galaxy", "Galaxy Core", "1.0",
+                "Typed galaxy morphology, position, extent and optional population estimates.",
+                java.util.List.of("everything-engine.core", "everything-engine.core.spatial"),
+                java.util.List.of("Galaxy models", "Extensible morphology")), ModuleStatus.ACTIVE);
+        modules.register(new ModuleDescriptor(
+                "everything-engine.core.galaxy.structure", "Galactic Structure", "1.0",
+                "Galactic structure entities and parametric geometry.",
+                java.util.List.of("everything-engine.core.galaxy", "everything-engine.core.spatial"),
+                java.util.List.of("Cores", "Disks", "Spiral arms", "Haloes")), ModuleStatus.ACTIVE);
+        modules.register(new ModuleDescriptor(
+                "everything-engine.core.distribution", "Spatial Distribution", "1.0",
+                "Seeded uniform, disk, radial and spiral position distributions.",
+                java.util.List.of("everything-engine.core.spatial", "everything-engine.core.randomization"),
+                java.util.List.of("Uniform volume", "Disk", "Radial", "Spiral")), ModuleStatus.ACTIVE);
+        modules.register(new ModuleDescriptor(
+                "everything-engine.core.stellar", "Stellar Objects", "1.0",
+                "Typed stellar systems, stars and physical-property plausibility checks.",
+                java.util.List.of("everything-engine.core.galaxy", "everything-engine.core.spatial"),
+                java.util.List.of("Stellar systems", "Stars", "Stellar validation")), ModuleStatus.ACTIVE);
+        modules.register(new ModuleDescriptor(
+                "everything-engine.core.galaxy.generator", "Galaxy Generator", "1.0",
+                "Seeded structural and population generation with validated atomic Universe registration.",
+                java.util.List.of("everything-engine.core.galaxy", "everything-engine.core.galaxy.structure",
+                        "everything-engine.core.distribution", "everything-engine.core.stellar",
+                        "everything-engine.core.naming"),
+                java.util.List.of("Structural generation", "Population generation")), ModuleStatus.ACTIVE);
+        modules.register(new ModuleDescriptor(
+                "everything-engine.core.spatial.index", "Spatial Index", "1.0",
+                "Rebuildable spatial radius, bounds and nearest-neighbor queries.",
+                java.util.List.of("everything-engine.core.spatial"),
+                java.util.List.of("Radius queries", "Bounds queries", "Nearest objects")), ModuleStatus.ACTIVE);
+        modules.register(new ModuleDescriptor(
                 "everything-engine.desktop", "Desktop Application", "1.0",
                 "JavaFX development and inspection tools.", java.util.List.of(),
                 java.util.List.of("Universe inspection", "Diagnostics")), ModuleStatus.ACTIVE);

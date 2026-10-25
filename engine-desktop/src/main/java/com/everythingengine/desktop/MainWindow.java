@@ -65,7 +65,7 @@ public final class MainWindow {
             ((EntitiesPage) pages.get("Entities")).selectEntity(id);
         }));
         pages.put("Modules", new ModulesPage(context));
-        pages.put("Generation", new GenerationPage());
+        pages.put("Generation", new GenerationPage(context));
         pages.put("Testing", new TestingPage(context));
         pages.put("Logs", new LogsPage(context));
         pages.put("Settings", new SettingsPage(context, this::applyTheme, this::languageChanged));

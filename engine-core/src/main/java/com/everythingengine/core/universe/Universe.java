@@ -6,6 +6,7 @@ import com.everythingengine.core.relation.RelationType;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +31,50 @@ public final class Universe {
         if (entities.putIfAbsent(entity.id(), entity) != null) {
             throw new IllegalArgumentException("An entity with UUID " + entity.id() + " is already registered");
         }
+    }
+
+    /**
+     * Registers a related collection of entities and relations atomically with respect to validation.
+     * All entities and relation endpoints are checked before the universe is mutated.
+     */
+    public void registerBatch(Collection<? extends Entity> newEntities, Collection<Relation> newRelations) {
+        Objects.requireNonNull(newEntities, "newEntities");
+        Objects.requireNonNull(newRelations, "newRelations");
+        List<? extends Entity> entityBatch = List.copyOf(newEntities);
+        List<Relation> relationBatch = List.copyOf(newRelations);
+
+        Map<UUID, Entity> batchEntities = new HashMap<>();
+        for (Entity entity : entityBatch) {
+            Objects.requireNonNull(entity, "entity");
+            if (entities.containsKey(entity.id()) || batchEntities.putIfAbsent(entity.id(), entity) != null) {
+                throw new IllegalArgumentException("An entity with UUID " + entity.id() + " is already registered");
+            }
+        }
+
+        Set<UUID> batchRelationIds = new HashSet<>();
+        for (Relation relation : relationBatch) {
+            Objects.requireNonNull(relation, "relation");
+            if (relations.containsKey(relation.id()) || !batchRelationIds.add(relation.id())) {
+                throw new IllegalArgumentException("A relation with UUID " + relation.id() + " is already registered");
+            }
+            requireBatchEndpoint(relation.source(), batchEntities);
+            requireBatchEndpoint(relation.target(), batchEntities);
+        }
+
+        batchEntities.values().forEach(this::registerEntity);
+        relationBatch.forEach(this::addRelation);
+    }
+
+    private void requireBatchEndpoint(Entity endpoint, Map<UUID, Entity> batchEntities) {
+        Entity registered = entities.get(endpoint.id());
+        if (registered == endpoint) {
+            return;
+        }
+        if (registered == null && batchEntities.get(endpoint.id()) == endpoint) {
+            return;
+        }
+        throw new IllegalStateException(
+                "Relation endpoint " + endpoint.id() + " is not registered or included in the batch");
     }
 
     public Optional<Entity> findEntity(UUID id) {

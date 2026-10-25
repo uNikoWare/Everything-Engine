@@ -9,16 +9,19 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
+import com.everythingengine.desktop.DesktopContext;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 public final class GenerationPage implements Page {
+    private final DesktopContext context;
     private final ComboBox<GenerationOption> generatorSelector = new ComboBox<>();
     private final StackPane generatorContent = new StackPane();
     private final VBox root = new VBox(16);
 
-    public GenerationPage() {
+    public GenerationPage(DesktopContext context) {
+        this.context = context;
         generatorSelector.getItems().setAll(generationOptions());
         generatorSelector.setConverter(new StringConverter<>() {
             @Override
@@ -62,13 +65,17 @@ public final class GenerationPage implements Page {
     }
 
     private List<GenerationOption> generationOptions() {
-        return List.of(new GenerationOption("Name generation", () -> new NameGenerationPanel().node()));
+        return List.of(
+                new GenerationOption("Name generation", () -> new NameGenerationPanel().node()),
+                new GenerationOption("Galaxy generation", () -> new GalaxyGenerationPanel(context).node()));
     }
 
     private void showSelectedGenerator() {
         GenerationOption option = generatorSelector.getValue();
         if (option != null) {
-            generatorContent.getChildren().setAll(option.contentFactory().get());
+            Node selected = option.contentFactory().get();
+            generatorContent.getChildren().setAll(selected);
+            Localization.translate(selected);
         }
     }
 

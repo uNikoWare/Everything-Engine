@@ -2,14 +2,26 @@ package com.everythingengine.desktop.persistence;
 
 import com.everythingengine.core.attribute.AttributeKey;
 import com.everythingengine.core.entity.BasicEntity;
+import com.everythingengine.core.distribution.DiskDistribution;
+import com.everythingengine.core.galaxy.Galaxy;
+import com.everythingengine.core.galaxy.GalaxyExtent;
+import com.everythingengine.core.galaxy.GalaxyType;
+import com.everythingengine.core.galaxy.generation.GalaxyGenerationConfig;
+import com.everythingengine.core.galaxy.generation.GalaxyGenerationMode;
+import com.everythingengine.core.galaxy.generation.GalaxyGenerator;
 import com.everythingengine.core.relation.Relation;
 import com.everythingengine.core.relation.RelationType;
+import com.everythingengine.core.spatial.CoordinateSpace;
+import com.everythingengine.core.spatial.Position3D;
+import com.everythingengine.core.stellar.Star;
+import com.everythingengine.core.stellar.StellarSystem;
 import com.everythingengine.core.universe.Universe;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,5 +71,52 @@ class UniversePersistenceTest {
         var exception = org.junit.jupiter.api.Assertions.assertThrows(
                 java.io.IOException.class, () -> new UniversePersistence().load(file));
         assertTrue(exception.getMessage().contains("Unsupported"));
+    }
+
+    @Test
+    void remainsCompatibleWithVersionOneUniverseFiles() throws Exception {
+        UUID id = UUID.randomUUID();
+        Path file = temporaryDirectory.resolve("legacy.eeu");
+        java.nio.file.Files.writeString(file, """
+                format.version=1
+                entity.count=1
+                entity.0.id=%s
+                entity.0.name=Legacy
+                entity.0.attribute.count=0
+                relation.count=0
+                """.formatted(id));
+
+        Universe restored = new UniversePersistence().load(file);
+
+        assertEquals("Legacy", restored.findEntity(id).orElseThrow().name());
+        assertTrue(restored.findEntity(id).orElseThrow() instanceof BasicEntity);
+    }
+
+    @Test
+    void roundTripsTypedGalaxyPopulationAndRelationships() throws Exception {
+        CoordinateSpace space = new CoordinateSpace("galactic-frame");
+        GalaxyGenerationConfig config = new GalaxyGenerationConfig(
+                "Persisted Galaxy", GalaxyType.SPIRAL, new Position3D(space, 1, 2, 3),
+                GalaxyExtent.spherical(1_000), GalaxyGenerationMode.POPULATION, 4,
+                Optional.of(new DiskDistribution(500, 20)), Optional.empty(), true, 77);
+        Universe original = new Universe();
+        new GalaxyGenerator().generate(config).register(original);
+
+        Path file = temporaryDirectory.resolve("galaxy.eeu");
+        UniversePersistence persistence = new UniversePersistence();
+        persistence.save(original, file);
+        Universe restored = persistence.load(file);
+
+        Galaxy galaxy = restored.entitiesOfType(Galaxy.class).getFirst();
+        StellarSystem system = restored.entitiesOfType(StellarSystem.class).getFirst();
+        Star star = restored.entitiesOfType(Star.class).getFirst();
+        assertEquals("Persisted Galaxy", galaxy.name());
+        assertEquals(GalaxyType.SPIRAL, galaxy.type());
+        assertEquals(space, galaxy.position().space());
+        assertEquals(4, restored.entitiesOfType(StellarSystem.class).size());
+        assertEquals(4, restored.entitiesOfType(Star.class).size());
+        assertEquals(original.relations().size(), restored.relations().size());
+        assertEquals(system.galaxy().id(), galaxy.id());
+        assertTrue(restored.relations().stream().anyMatch(relation -> relation.target().id().equals(star.id())));
     }
 }
